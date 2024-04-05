@@ -1,0 +1,79 @@
+.navbar-container{
+    background-color: #14181C;
+}
+
+.navbar-title{
+    font-family:Arial, Helvetica, sans-serif;
+    color: white;
+    font-size: 4rem;
+    font-weight:900;
+    font-style: italic;
+    margin-right: 50px;
+}
+
+.navbar-text{
+    font-family: Arial, Helvetica, sans-serif;
+    color: white;
+    font-size: 1.5rem;
+    margin-right: 50px;
+}
+
+
+.navbar-button {
+  align-items: center;
+  margin-right: 50px;
+  background-color: #fff;
+  border: 2px solid #000;
+  box-sizing: border-box;
+  color: #000;
+  cursor: pointer;
+  display: inline-flex;
+  fill: #000;
+  font-family: Inter,sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  height: 48px;
+  justify-content: center;
+  letter-spacing: -.8px;
+  line-height: 24px;
+  min-width: 140px;
+  outline: 0;
+  padding: 0 17px;
+  text-align: center;
+  text-decoration: none;
+  transition: all .3s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.navbar-button:focus {
+  color: #171e29;
+}
+
+.navbar-button:hover {
+  border-color: #FA7272;
+  color: #FA7272;
+  fill: #FA7272;
+}
+
+.navbar-button:active {
+  border-color: #FA7272;
+  color: #FA7272;
+  fill: #FA7272;
+}
+
+@media (min-width: 768px) {
+  .navbar-button {
+    min-width: 170px;
+  }
+}
+
+.navbar-text:hover{
+    color: #FA7272;
+}
+
+.navbar-title:hover{
+    color: #FA7272;
+}
+
