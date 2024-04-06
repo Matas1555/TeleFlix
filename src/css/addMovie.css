@@ -1,0 +1,52 @@
+.modal-content {
+  margin-top: 150px;
+  min-width: 80%;
+  color: white;
+  border-color: #fa7272;
+  overflow: hidden;
+}
+
+.modal-backdrop {
+  color: #14181c !important;
+}
+
+.modal-header {
+  background-color: #14181c !important;
+  border-bottom: 1px solid #14181c;
+
+  color: white;
+}
+
+.modal-body {
+  background-color: #14181c !important;
+
+  color: white;
+}
+
+.modal-footer {
+  background-color: #14181c !important;
+  border-top: 1px solid #14181c;
+  color: white;
+}
+
+.modal-title {
+  font-weight: 800;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.form-control {
+  margin-top: 20px;
+  background-color: #1d242b;
+  color: white;
+}
+.form-label {
+  margin-top: 20px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 550;
+}
+
+.form-control:focus {
+  margin-top: 20px;
+  background-color: #1d242b;
+  color: white;
+}
