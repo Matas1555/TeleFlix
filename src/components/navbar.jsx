@@ -39,6 +39,9 @@ function NavBar({ onShowModal }) {
             <Nav.Link className="navbar-text" href="/login">
               Login
             </Nav.Link>
+            <Nav.Link className="navbar-text" href="/register">
+              Register
+            </Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>

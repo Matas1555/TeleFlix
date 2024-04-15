@@ -1,27 +1,47 @@
 import "../css/login.css";
+import { useRef } from "react";
+import { loginUser } from "../backend/auth-service";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
+
+  const handleLogin = async () => {
+    const email = emailRef.current.value;
+    const password = passwordRef.current.value;
+
+    const response = await loginUser(email, password);
+    if (response.status) {
+      navigate("/");
+      console.log("Logged in successfully");
+    } else {
+      console.log("Failed to login");
+    }
+  };
+
   return (
     <div className="login-container">
-      <div class="login-box">
+      <div className="login-box">
         <h2>Login</h2>
-        <form action="#" method="post">
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            required
-          ></input>
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            required
-          ></input>
-          <button className="submit-button" type="submit">
-            Login
-          </button>
-        </form>
+        <input
+          type="text"
+          name="email"
+          placeholder="Email"
+          ref={emailRef}
+          required
+        ></input>
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          ref={passwordRef}
+          required
+        ></input>
+        <button className="submit-button" type="submit" onClick={handleLogin}>
+          Login
+        </button>
       </div>
     </div>
   );
