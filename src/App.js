@@ -1,12 +1,12 @@
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useState } from "react";
-import Navbar from "./components/navbar";
+import Navbar from "./frontend/components/navbar";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./pages/login";
-import Register from "./pages/register";
-import HomePage from "./pages/homePage";
-import AddMovie from "./components/addMovie";
+import Login from "./frontend/pages/login";
+import Register from "./frontend/pages/register";
+import HomePage from "./frontend/pages/homePage";
+import AddMovie from "./frontend/components/addMovie";
 
 function App() {
   const [showModal, setShowModal] = useState(false);

@@ -1,6 +1,6 @@
 import "../css/login.css";
 import { useRef } from "react";
-import { loginUser } from "../backend/auth-service";
+import { loginUser } from "../../backend/auth-service";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
@@ -8,9 +8,35 @@ const Login = () => {
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
 
+  const isPasswordValid = (password) => {
+    if (password < 6) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const isEmailValid = (email) => {
+    // Regular expression for basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleLogin = async () => {
     const email = emailRef.current.value;
     const password = passwordRef.current.value;
+
+    if (!isEmailValid(email)) {
+      console.log("Email is bad!");
+      alert("Email is bad!");
+      return;
+    }
+
+    if (!isPasswordValid(password)) {
+      console.log("Password too short!");
+      alert("Password must be over 6 characters long");
+      return;
+    }
 
     const response = await loginUser(email, password);
     if (response.status) {

@@ -1,12 +1,8 @@
 import "../css/login.css";
 import { useState, useRef } from "react";
-import { registerUser } from "../backend/auth-service";
+import { registerUser } from "../../backend/auth-service";
 
 const Register = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
-
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
   const usernameRef = useRef(null);

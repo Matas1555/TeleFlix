@@ -4,8 +4,53 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import "../css/addMovie.css";
+import { addMovie } from "../../backend/movieController";
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function AddMovie({ showModal, onCloseModal }) {
+  const navigate = useNavigate();
+  const titleRef = useRef("");
+  const descriptionRef = useRef("");
+  const directorRef = useRef("");
+  const actorsRef = useRef("");
+  const yearRef = useRef("");
+  const posterURLRef = useRef("");
+  const [file, setFile] = useState(null);
+
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  };
+
+  const handleMovieUpload = async () => {
+    const title = titleRef.current.value;
+    const description = descriptionRef.current.value;
+    const director = directorRef.current.value;
+    const actors = actorsRef.current.value;
+    const year = yearRef.current.value;
+    const posterURL = posterURLRef.current.value;
+
+    if (!title || !description || !actors || !year || !file) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    const movieData = {
+      title,
+      description,
+      director,
+      actors: actors.split(",").map((actor) => actor.trim()), // Assuming actors are entered as comma-separated values
+      year,
+      posterURL,
+      file,
+    };
+
+    const response = await addMovie(movieData, file);
+    if (response.status) {
+      navigate("/");
+    }
+  };
+
   return (
     <Modal show={showModal} onHide={onCloseModal}>
       <Modal.Header closeButton className="modal-header">
@@ -18,7 +63,7 @@ function AddMovie({ showModal, onCloseModal }) {
               Title
             </Form.Label>
             <Col sm="10">
-              <Form.Control type="string" placeholder="" />
+              <Form.Control type="string" placeholder="" ref={titleRef} />
             </Col>
           </Form.Group>
           <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
@@ -26,6 +71,7 @@ function AddMovie({ showModal, onCloseModal }) {
               as="textarea"
               rows={3}
               placeholder="Write a description for the movie"
+              ref={descriptionRef}
             />
           </Form.Group>
           <Form.Group as={Row} className="mb-3">
@@ -33,7 +79,7 @@ function AddMovie({ showModal, onCloseModal }) {
               Director
             </Form.Label>
             <Col sm="10">
-              <Form.Control type="string" placeholder="" />
+              <Form.Control type="string" placeholder="" ref={directorRef} />
             </Col>
           </Form.Group>
           <Form.Group as={Row} className="mb-3">
@@ -41,7 +87,7 @@ function AddMovie({ showModal, onCloseModal }) {
               Actors
             </Form.Label>
             <Col sm="10">
-              <Form.Control type="string" placeholder="" />
+              <Form.Control type="string" placeholder="" ref={actorsRef} />
             </Col>
           </Form.Group>
           <Form.Group as={Row} className="mb-3">
@@ -49,7 +95,7 @@ function AddMovie({ showModal, onCloseModal }) {
               Year
             </Form.Label>
             <Col sm="10">
-              <Form.Control type="number" placeholder="" />
+              <Form.Control type="number" placeholder="" ref={yearRef} />
             </Col>
           </Form.Group>
           <Form.Group as={Row} className="mb-3">
@@ -57,7 +103,7 @@ function AddMovie({ showModal, onCloseModal }) {
               Movie poster URL
             </Form.Label>
             <Col sm="8">
-              <Form.Control type="string" placeholder="" />
+              <Form.Control type="string" placeholder="" ref={posterURLRef} />
             </Col>
           </Form.Group>
           <Form.Group controlId="formFile" as={Row} className="mb-3">
@@ -65,7 +111,7 @@ function AddMovie({ showModal, onCloseModal }) {
               Movie file
             </Form.Label>
             <Col sm="9">
-              <Form.Control type="file" />
+              <Form.Control type="file" onChange={handleFileChange} />
             </Col>
           </Form.Group>
         </Form>
@@ -82,7 +128,7 @@ function AddMovie({ showModal, onCloseModal }) {
           className="navbar-button"
           variant="primary"
           onClick={() => {
-            /* handle save action */ onCloseModal();
+            handleMovieUpload();
           }}
         >
           Add movie
