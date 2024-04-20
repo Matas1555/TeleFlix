@@ -1,0 +1,24 @@
+table {
+  border-collapse: collapse;
+  width: 100%;
+  color: white; /* Set text color to white */
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+th {
+  background-color: black;
+  text-align: left;
+}
+
+/* Buttons below the table */
+.buttons-below {
+  margin-top: 20px;
+  text-align: center;
+}
+
+
+
