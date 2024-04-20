@@ -1,6 +1,6 @@
 import "../css/login.css";
 import { useState, useRef } from "react";
-import { registerUser } from "../../backend/auth-service";
+import { registerUser } from "../../backend/controllers/authController";
 
 const Register = () => {
   const emailRef = useRef(null);

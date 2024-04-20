@@ -25,11 +25,8 @@ function NavBar({ onShowModal }) {
             <Button className="navbar-button" href="/">
               Watch a movie!
             </Button>
-            <Button className="navbar-button" onClick={onShowModal}>
-              Add a movie
-            </Button>
-            <Nav.Link className="navbar-text" href="/">
-              Home
+            <Nav.Link className="navbar-text" href="/movies">
+              Movies
             </Nav.Link>
             <Nav.Link className="navbar-text" href="/calendar">
               Calendar

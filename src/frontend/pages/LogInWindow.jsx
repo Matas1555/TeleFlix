@@ -1,6 +1,6 @@
 import "../css/login.css";
 import { useRef } from "react";
-import { loginUser } from "../../backend/auth-service";
+import { loginUser } from "../../backend/controllers/authController";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {

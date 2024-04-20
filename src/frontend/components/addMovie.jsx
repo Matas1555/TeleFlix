@@ -4,7 +4,7 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import "../css/addMovie.css";
-import { addMovie } from "../../backend/movieController";
+import { addMovie } from "../../backend/controllers/movieController";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -47,6 +47,7 @@ function AddMovie({ showModal, onCloseModal }) {
 
     const response = await addMovie(movieData, file);
     if (response.status) {
+      onCloseModal();
       navigate("/");
     }
   };
