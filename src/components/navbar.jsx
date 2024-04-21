@@ -9,6 +9,8 @@ import { useState } from "react";
 import "../css/navbar.css";
 
 function NavBar({ onShowModal }) {
+  const isLoggedIn = !!localStorage.getItem("token");
+
   return (
     <Navbar expand="lg">
       <Container fluid>
@@ -35,11 +37,33 @@ function NavBar({ onShowModal }) {
               Calendar
             </Nav.Link>
           </Nav>
+<<<<<<< Updated upstream:src/components/navbar.jsx
           <Nav>
             <Nav.Link className="navbar-text" href="/login">
               Login
             </Nav.Link>
           </Nav>
+=======
+          {isLoggedIn ? (
+            <Nav>
+              <Nav.Link className="navbar-text" href="/profile">
+                Profile
+              </Nav.Link>
+              <Nav.Link className="navbar-text" href="/logout">
+                Logout
+              </Nav.Link>
+            </Nav>
+          ) : (
+            <Nav>
+              <Nav.Link className="navbar-text" href="/login">
+                Login
+              </Nav.Link>
+              <Nav.Link className="navbar-text" href="/register">
+                Register
+              </Nav.Link>
+            </Nav>
+          )}
+>>>>>>> Stashed changes:src/frontend/components/navbar.jsx
         </Navbar.Collapse>
       </Container>
     </Navbar>
