@@ -115,7 +115,7 @@ function MovieList({ onShowModal }) {
                         onChange={handleChange}
                       />
                     ) : (
-                      movie.actors.join(", ")
+                      movie.actors
                     )}
                   </td>
                   <td>
