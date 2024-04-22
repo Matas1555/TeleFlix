@@ -1,3 +1,5 @@
+import React from 'react'
+import ReactDOM from 'react-dom'
 import "../css/login.css";
 import { useState, useRef } from "react";
 import { registerUser } from "../../backend/controllers/authController";
