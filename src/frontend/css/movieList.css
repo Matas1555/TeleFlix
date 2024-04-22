@@ -1,16 +1,18 @@
 table {
   border-collapse: collapse;
   width: 100%;
+  background-color: #1f2328;
   color: white; /* Set text color to white */
 }
 
-th, td {
-  border: 1px solid #ddd;
+th,
+td {
+  border: 2px solid black;
   padding: 8px;
 }
 
 th {
-  background-color: black;
+  background-color: #0f1113;
   text-align: left;
 }
 
@@ -20,5 +22,34 @@ th {
   text-align: center;
 }
 
+.movieListAddContainer {
+  border-top: 2px solid black;
+  border-bottom: 2px solid black;
+  width: 100%;
+  padding: 20px 40px 20px 40px;
+  display: flex;
+  justify-content: space-between;
+}
 
+.movie-list-container {
+  margin: 20px 50px 0px 50px;
+}
 
+.actions-tab {
+  margin-left: 20px;
+}
+
+.movieEditInput {
+  width: 100%;
+  padding: 10px;
+  color: white;
+  background-color: #0f1113;
+  border: 2px solid black;
+}
+
+.movieEditInputTextArea {
+  width: 80%;
+  color: white;
+  background-color: #0f1113;
+  border: 2px solid black;
+}

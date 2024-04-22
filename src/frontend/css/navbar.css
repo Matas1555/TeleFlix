@@ -1,5 +1,6 @@
 .navbar {
   background-color: #14181c;
+  gap: 10px;
   /* border-bottom: solid 2px black; */
 }
 
@@ -16,12 +17,12 @@
   font-family: Arial, Helvetica, sans-serif;
   color: white;
   font-size: 1.5rem;
-  margin-right: 50px;
+  margin-left: 50px;
 }
 
 .navbar-button {
   align-items: center;
-  margin-right: 50px;
+  /* margin-right: 50px; */
   background-color: #fff;
   border: 2px solid #000;
   box-sizing: border-box;

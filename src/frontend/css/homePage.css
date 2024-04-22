@@ -4,8 +4,8 @@ body {
 
 .joinRoomContainer {
   position: absolute;
-  top: 45%;
-  left: 35%;
+  top: 35%;
+  left: 45%;
 }
 
 .inputContainer {
@@ -42,9 +42,11 @@ body {
   border-radius: 3px;
   box-sizing: border-box;
   height: 45px;
+  text-align: center;
 }
 
 .homePageText {
   color: white;
   text-align: center;
+  margin-right: 40px;
 }

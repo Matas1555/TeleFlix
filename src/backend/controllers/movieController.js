@@ -1,7 +1,21 @@
 // movieController.js
 import { db } from "./firebase-config";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { addDoc, collection, getDocs, doc, updateDoc, deleteDoc, getDoc } from "firebase/firestore";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+import {
+  addDoc,
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+  getDoc,
+} from "firebase/firestore";
 
 // Create a new movie
 export const addMovie = async (movieData, file) => {
@@ -22,6 +36,7 @@ export const addMovie = async (movieData, file) => {
       year: movieData.year,
       posterURL: movieData.posterURL,
       movieURL: movieURL,
+      movieRef: `movies/${file.name}`,
     });
     console.log("Movie added successfully");
     return { status: true };
@@ -77,6 +92,21 @@ export const updateMovie = async (movieId, updatedMovieData) => {
 
 // Delete a movie
 export const deleteMovie = async (movieId) => {
+  const movie = await getMovie(movieId);
+  const storage = getStorage();
+
+  // Create a reference to the file to delete
+  const fileRef = ref(storage, movie.movieRef);
+
+  // Delete the file
+  deleteObject(fileRef)
+    .then(() => {
+      console.log("File deleted successfully");
+    })
+    .catch((error) => {
+      console.log("Error deleting file", error);
+    });
+
   try {
     await deleteDoc(doc(db, "movies", movieId));
     console.log("Movie deleted successfully");

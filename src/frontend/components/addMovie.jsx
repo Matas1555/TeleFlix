@@ -1,5 +1,5 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
+import React from "react";
+import ReactDOM from "react-dom";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Col from "react-bootstrap/Col";
@@ -50,7 +50,8 @@ function AddMovie({ showModal, onCloseModal }) {
     const response = await addMovie(movieData, file);
     if (response.status) {
       onCloseModal();
-      navigate("/");
+      navigate("/movies");
+      navigate(0);
     }
   };
 

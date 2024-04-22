@@ -58,12 +58,13 @@ function MovieList({ onShowModal }) {
 
   return (
     <>
-      <div className="joinRoomContainer">
-        <div className="inputContainer">
-          <button className="navbar-button" onClick={onShowModal}>
-            Add a Movie
-          </button>
-        </div>
+      <div className="movieListAddContainer">
+        <button className="navbar-button" onClick={onShowModal}>
+          Add a Movie
+        </button>
+        <button className="navbar-button">Filter</button>
+      </div>
+      <div className="movie-list-container">
         <div className="movie-list">
           <table>
             <thead>
@@ -83,6 +84,7 @@ function MovieList({ onShowModal }) {
                       <input
                         type="text"
                         name="title"
+                        className="movieEditInput"
                         value={editedMovie.title}
                         onChange={handleChange}
                       />
@@ -92,9 +94,10 @@ function MovieList({ onShowModal }) {
                   </td>
                   <td>
                     {editedMovie && editedMovie.id === movie.id ? (
-                      <input
+                      <textarea
                         type="text"
                         name="description"
+                        className="movieEditInputTextArea"
                         value={editedMovie.description}
                         onChange={handleChange}
                       />
@@ -107,11 +110,12 @@ function MovieList({ onShowModal }) {
                       <input
                         type="text"
                         name="actors"
+                        className="movieEditInput"
                         value={editedMovie.actors}
                         onChange={handleChange}
                       />
                     ) : (
-                      movie.actors
+                      movie.actors.join(", ")
                     )}
                   </td>
                   <td>
@@ -119,6 +123,7 @@ function MovieList({ onShowModal }) {
                       <input
                         type="text"
                         name="year"
+                        className="movieEditInput"
                         value={editedMovie.year}
                         onChange={handleChange}
                       />
@@ -126,20 +131,31 @@ function MovieList({ onShowModal }) {
                       movie.year
                     )}
                   </td>
-                  <td>
+                  <td className="actions-tab">
                     {editedMovie && editedMovie.id === movie.id ? (
                       <>
-                        <button onClick={handleSave}>Save</button>
-                        <button onClick={() => setEditedMovie(null)}>
+                        <button className="navbar-button" onClick={handleSave}>
+                          Save
+                        </button>
+                        <button
+                          className="navbar-button"
+                          onClick={() => setEditedMovie(null)}
+                        >
                           Cancel
                         </button>
                       </>
                     ) : (
                       <>
-                        <button onClick={() => handleEdit(movie.id)}>
+                        <button
+                          className="navbar-button"
+                          onClick={() => handleEdit(movie.id)}
+                        >
                           Edit
                         </button>
-                        <button onClick={() => handleDelete(movie.id)}>
+                        <button
+                          className="navbar-button"
+                          onClick={() => handleDelete(movie.id)}
+                        >
                           Delete
                         </button>
                       </>
