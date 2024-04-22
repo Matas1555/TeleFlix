@@ -3,9 +3,10 @@ body {
 }
 
 .joinRoomContainer {
-  position: absolute;
-  top: 35%;
-  left: 45%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20vh;
 }
 
 .inputContainer {
