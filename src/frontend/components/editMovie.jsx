@@ -7,10 +7,11 @@ import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import "../css/addMovie.css";
 import { addMovie } from "../../backend/controllers/movieController";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { updateMovie } from "../../backend/controllers/movieController";
 
-function AddMovie({ showModal, onCloseModal }) {
+function EditMovie({ showEditModal, onCloseEditModal, movie }) {
   const navigate = useNavigate();
   const titleRef = useRef("");
   const descriptionRef = useRef("");
@@ -18,11 +19,27 @@ function AddMovie({ showModal, onCloseModal }) {
   const actorsRef = useRef("");
   const yearRef = useRef("");
   const posterURLRef = useRef("");
-  const [file, setFile] = useState(null);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    director: "",
+    actors: "",
+    year: "",
+    posterURL: "",
+  });
 
-  const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
-  };
+  useEffect(() => {
+    if (movie) {
+      setFormData({
+        title: movie.title,
+        description: movie.description,
+        director: movie.director,
+        actors: movie.actors.join(", "), // Convert actors array to string
+        year: movie.year,
+        posterURL: movie.posterURL,
+      });
+    }
+  }, [movie]);
 
   const handleMovieValidation = () => {
     const title = titleRef.current.value;
@@ -32,7 +49,7 @@ function AddMovie({ showModal, onCloseModal }) {
     const year = yearRef.current.value;
     const posterURL = posterURLRef.current.value;
 
-    if (!title || !description || !actors || !director || !year || !file) {
+    if (!title || !description || !actors || !director || !year) {
       alert("Please fill in all fields.");
       return;
     }
@@ -51,25 +68,28 @@ function AddMovie({ showModal, onCloseModal }) {
       actors: actors.split(",").map((actor) => actor.trim()), // Assuming actors are entered as comma-separated values
       year,
       posterURL,
-      file,
     };
 
     handleMovieUpload(movieData);
   };
 
   const handleMovieUpload = async (movieData) => {
-    const response = await addMovie(movieData, file);
-    if (response.status) {
-      onCloseModal();
-      navigate("/movies");
+    const queryParams = new URLSearchParams(window.location.search);
+    const movieId = queryParams.get("movieId");
+    try {
+      await updateMovie(movieId, movieData);
+      console.log("Movie updated successfully");
       navigate(0);
+    } catch (e) {
+      console.log("Error updating movie", e);
+      alert("Error updating movie");
     }
   };
 
   return (
-    <Modal show={showModal} onHide={onCloseModal}>
+    <Modal show={showEditModal} onHide={onCloseEditModal}>
       <Modal.Header closeButton className="modal-header">
-        <Modal.Title>Add A New Movie</Modal.Title>
+        <Modal.Title>Update movie</Modal.Title>
       </Modal.Header>
       <Modal.Body className="modal-box">
         <Form>
@@ -78,14 +98,20 @@ function AddMovie({ showModal, onCloseModal }) {
               Title
             </Form.Label>
             <Col sm="10">
-              <Form.Control type="string" placeholder="" ref={titleRef} />
+              <Form.Control
+                type="string"
+                placeholder=""
+                defaultValue={formData.title}
+                ref={titleRef}
+              />
             </Col>
           </Form.Group>
           <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
             <Form.Control
               as="textarea"
               rows={3}
-              placeholder="Write a description for the movie"
+              placeholder=""
+              defaultValue={formData.description}
               ref={descriptionRef}
             />
           </Form.Group>
@@ -94,7 +120,12 @@ function AddMovie({ showModal, onCloseModal }) {
               Director
             </Form.Label>
             <Col sm="10">
-              <Form.Control type="string" placeholder="" ref={directorRef} />
+              <Form.Control
+                type="string"
+                placeholder=""
+                defaultValue={formData.director}
+                ref={directorRef}
+              />
             </Col>
           </Form.Group>
           <Form.Group as={Row} className="mb-3">
@@ -102,7 +133,12 @@ function AddMovie({ showModal, onCloseModal }) {
               Actors
             </Form.Label>
             <Col sm="10">
-              <Form.Control type="string" placeholder="" ref={actorsRef} />
+              <Form.Control
+                type="string"
+                placeholder=""
+                defaultValue={formData.actors}
+                ref={actorsRef}
+              />
             </Col>
           </Form.Group>
           <Form.Group as={Row} className="mb-3">
@@ -110,7 +146,12 @@ function AddMovie({ showModal, onCloseModal }) {
               Year
             </Form.Label>
             <Col sm="10">
-              <Form.Control type="number" placeholder="" ref={yearRef} />
+              <Form.Control
+                type="number"
+                placeholder=""
+                defaultValue={formData.year}
+                ref={yearRef}
+              />
             </Col>
           </Form.Group>
           <Form.Group as={Row} className="mb-3">
@@ -118,15 +159,12 @@ function AddMovie({ showModal, onCloseModal }) {
               Movie poster URL
             </Form.Label>
             <Col sm="8">
-              <Form.Control type="string" placeholder="" ref={posterURLRef} />
-            </Col>
-          </Form.Group>
-          <Form.Group controlId="formFile" as={Row} className="mb-3">
-            <Form.Label column sm="3">
-              Movie file
-            </Form.Label>
-            <Col sm="9">
-              <Form.Control type="file" onChange={handleFileChange} />
+              <Form.Control
+                type="string"
+                placeholder=""
+                defaultValue={formData.posterURL}
+                ref={posterURLRef}
+              />
             </Col>
           </Form.Group>
         </Form>
@@ -135,15 +173,13 @@ function AddMovie({ showModal, onCloseModal }) {
         <Button
           className="navbar-button"
           variant="primary"
-          onClick={() => {
-            handleMovieValidation();
-          }}
+          onClick={handleMovieValidation}
         >
-          Add movie
+          Update movie
         </Button>
       </Modal.Footer>
     </Modal>
   );
 }
 
-export default AddMovie;
+export default EditMovie;

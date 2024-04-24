@@ -23,16 +23,52 @@ th {
 }
 
 .movieListAddContainer {
-  border-top: 2px solid black;
-  border-bottom: 2px solid black;
   width: 100%;
   padding: 20px 40px 20px 40px;
   display: flex;
   justify-content: space-between;
 }
 
+.movie-list {
+  width: 90%;
+  margin: 30px 100px 30px 100px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8vh;
+}
+
+.movie-card {
+  width: 20vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 5%;
+  overflow: hidden;
+  box-shadow: inset 0 0 1px 1px rgba(20, 24, 28, 0.25);
+  transition: all ease 0.5s;
+}
+
+/* .card-overlay {
+  border: 2px solid white;
+  border-radius: 5%;
+} */
+
+.movie-card:hover {
+  /* border: 2px solid white; */
+  transform: translateY(-10px);
+  box-shadow: 1px 1px 32px 6px rgba(40, 48, 56, 0.75);
+  -webkit-box-shadow: 1px 1px 32px 6px rgba(40, 48, 56, 0.75);
+  -moz-box-shadow: 1px 1px 32px 6px rgba(40, 48, 56, 0.75);
+}
+
 .movie-list-container {
-  margin: 20px 50px 0px 50px;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0; /* Allows the container to grow with content */
 }
 
 .actions-tab {

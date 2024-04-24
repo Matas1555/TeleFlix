@@ -33,6 +33,7 @@ export const addMovie = async (movieData, file) => {
       title: movieData.title,
       description: movieData.description,
       actors: movieData.actors,
+      director: movieData.director,
       year: movieData.year,
       posterURL: movieData.posterURL,
       movieURL: movieURL,
@@ -63,7 +64,7 @@ export const getMovie = async (movieId) => {
 };
 
 // Read all movies
-export const getAllMovies = async () => {
+export const getMovieList = async () => {
   try {
     const moviesSnapshot = await getDocs(collection(db, "movies"));
     const movies = [];

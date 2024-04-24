@@ -1,0 +1,90 @@
+.movie-information-main-container {
+  color: white;
+  display: flex;
+  margin: 10vh 25vh 10vh 25vh;
+  gap: 10vh;
+}
+
+.movie-information-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5vh;
+}
+
+.movie-information-poster {
+  width: 40vh;
+  border-radius: 3%;
+  box-shadow: 1px 1px 32px 6px rgba(40, 48, 56, 0.75);
+  -webkit-box-shadow: 1px 1px 32px 6px rgba(40, 48, 56, 0.75);
+  -moz-box-shadow: 1px 1px 32px 6px rgba(40, 48, 56, 0.75);
+}
+
+.title-year {
+  display: flex;
+  gap: 8vh;
+  align-items: center;
+}
+
+.movie-title {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  margin: 0;
+}
+
+.movie-year {
+  font-family: "Inter", sans-serif;
+  font-weight: 100;
+  margin-right: 5vh;
+  margin-bottom: 0;
+}
+
+.movie-description {
+  font-family: "Inter", sans-serif;
+  font-size: 150%;
+  font-weight: 200;
+}
+
+.actors-list {
+  display: flex;
+  gap: 10px;
+}
+
+.actors-word {
+  font-family: "Inter", sans-serif;
+  font-size: 2vh;
+  font-weight: 700;
+}
+
+.movie-actors {
+  background-color: #283038;
+  padding: 5px 10px 5px 10px;
+  border-radius: 10%;
+  color: #a4adb6;
+  box-shadow: inset 0 1px 0 hsla(0, 0%, 100%, 0.05);
+}
+
+.edit-button {
+  color: white;
+  padding: 10px 15px;
+  background-color: #283038;
+  border: 2px solid white;
+  border-radius: 30%;
+}
+
+.edit-button:hover {
+  border: 2px solid #fa7272;
+  color: #fa7272;
+}
+
+.delete-button {
+  color: white;
+  padding: 10px 15px;
+  background-color: #283038;
+  border: 2px solid white;
+  border-radius: 30%;
+}
+
+.delete-button:hover {
+  border: 2px solid #fa7272;
+  color: #fa7272;
+}
