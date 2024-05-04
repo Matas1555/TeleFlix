@@ -1,5 +1,5 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
+import React from "react";
+import ReactDOM from "react-dom";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
@@ -24,7 +24,7 @@ function NavBar({ onShowModal }) {
             style={{ maxHeight: "100px" }}
             navbarScroll
           >
-            <Button className="navbar-button" href="/">
+            <Button className="navbar-button" href="/room">
               Watch a movie!
             </Button>
             <Nav.Link className="navbar-text" href="/movies">

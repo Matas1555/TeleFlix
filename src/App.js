@@ -11,6 +11,7 @@ import HomePage from "./frontend/pages/MainWindow";
 import AddMovie from "./frontend/components/addMovie";
 import EditMovie from "./frontend/components/editMovie";
 import MovieList from "./frontend/pages/MovieListWindow";
+import RoomPage from "./frontend/pages/RoomWindow";
 import MovieInformation from "./frontend/pages/MovieInformationWindow";
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/room" element={<RoomPage />} />
         <Route
           path="/movieInformation"
           element={<MovieInformation onShowEditModal={toggleEditModal} />}
