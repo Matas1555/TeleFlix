@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
@@ -7,10 +7,22 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import Modal from "react-bootstrap/Modal";
-import { useState } from "react";
+import { useAuth } from '../../authContext';
 import "../css/navbar.css";
 
-function NavBar({ onShowModal }) {
+
+
+import { auth } from "../../backend/controllers/firebase-config.js";
+
+const NavBar = () => {
+
+  const { currentUser, logoutUser } = useAuth();
+
+  const handleLogout = () => {
+    // Call logout method from the authentication context
+    logoutUser();
+  };
+
   return (
     <Navbar expand="lg">
       <Container fluid>
@@ -24,7 +36,7 @@ function NavBar({ onShowModal }) {
             style={{ maxHeight: "100px" }}
             navbarScroll
           >
-            <Button className="navbar-button" href="/room">
+            <Button className="navbar-button" href="/room"> {/* This should be a Nav.Link */}
               Watch a movie!
             </Button>
             <Nav.Link className="navbar-text" href="/movies">
@@ -35,17 +47,26 @@ function NavBar({ onShowModal }) {
             </Nav.Link>
           </Nav>
           <Nav>
-            <Nav.Link className="navbar-text" href="/login">
-              Login
-            </Nav.Link>
-            <Nav.Link className="navbar-text" href="/register">
-              Register
-            </Nav.Link>
+            {currentUser ? (
+              // If a user is logged in, display their username
+              <Nav.Link className="navbar-text">{currentUser}</Nav.Link>
+            ) : (
+              // If no user is logged in, display login and register links
+              <>
+                <Nav.Link className="navbar-text" href="/login">
+                  Login
+                </Nav.Link>
+                <Nav.Link className="navbar-text" href="/register">
+                  Register
+                </Nav.Link>
+              </>
+            )}
           </Nav>
         </Navbar.Collapse>
       </Container>
     </Navbar>
   );
-}
+};
 
 export default NavBar;
+

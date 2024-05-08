@@ -1,15 +1,21 @@
 import {
   deleteMovie,
   getMovie,
+  postComment, 
+  getCommentsByMovieId 
 } from "../../backend/controllers/movieController";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/movieInformation.css";
+import { useAuth } from '../../authContext';
 
 function MovieInformation({ onShowEditModal }) {
+  const { currentUser } = useAuth(); 
   const navigate = useNavigate();
   const [movie, setMovie] = useState(null);
   const [movieId, setMovieID] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState("");
 
   useEffect(() => {
     const fetchMovieData = async () => {
@@ -25,8 +31,38 @@ function MovieInformation({ onShowEditModal }) {
       }
     };
 
+    
+    
     fetchMovieData();
+   
   }, []);
+
+
+  useEffect(() => {
+    if (movieId) {
+      getComments();
+    }
+  }, [movieId]);
+
+  const handleCommentSubmit = async () => {
+    try {
+      await postComment(movieId, commentText, currentUser );
+      const updatedComments = await getCommentsByMovieId(movieId);
+      setComments(updatedComments);
+      setCommentText(""); // Clear input after submission
+    } catch (error) {
+      console.error("Error posting comment:", error);
+    }
+  };
+
+  const getComments = async() => {
+    try {
+      const comments = await getCommentsByMovieId(movieId);
+      setComments(comments);
+    } catch (error) {
+      console.error("Error getting comments:", error);
+    }
+  }
 
   const handleMovieDeletion = async () => {
     const confirmed = window.confirm(
@@ -76,6 +112,24 @@ function MovieInformation({ onShowEditModal }) {
                 ))}
               </div>
             </div>
+
+            <div>
+            <h3>Comments</h3>
+            <div className="comment-section">
+              {comments.map((comment , index) => (
+                <div key={index} className="comment">
+                  <b><p>{comment.user}</p></b>
+                  <p>{comment.text}</p>
+                </div>
+              ))}
+            </div>
+            <textarea className="comment-field"
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder="Add a comment..."
+            ></textarea>
+            <button className="comment-button" onClick={handleCommentSubmit}>Post Comment</button>
+          </div>
 
             {movie.director ? (
               <div>

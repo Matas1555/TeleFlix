@@ -4,12 +4,13 @@ import "../css/login.css";
 import { useRef } from "react";
 import { loginUser } from "../../backend/controllers/authController";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from '../../authContext'; // Import the useAuth hook
 
 const Login = () => {
   const navigate = useNavigate();
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
-
+  const { login } = useAuth();
   const isPasswordValid = (password) => {
     if (password < 6) {
       return false;
@@ -40,7 +41,7 @@ const Login = () => {
       return;
     }
 
-    const response = await loginUser(email, password);
+    const response = await loginUser(email, password, login);
     if (response.status) {
       navigate("/");
       console.log("Logged in successfully");

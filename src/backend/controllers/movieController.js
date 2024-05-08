@@ -15,6 +15,8 @@ import {
   updateDoc,
   deleteDoc,
   getDoc,
+  query, 
+  where
 } from "firebase/firestore";
 
 // Create a new movie
@@ -44,6 +46,63 @@ export const addMovie = async (movieData, file) => {
   } catch (e) {
     console.error("Error adding movie: ", e);
     return { status: false, error: e.message };
+  }
+};
+
+export const postComment = async (movieId, commentText, user) => {
+  try {
+    const validate = await validateComment(movieId, commentText, user)
+    if(validate != true)
+      {
+        console.error("Error posting comment:", "Validation failed");
+      }
+    await addDoc(collection(db, "comments"), {
+      user: user,
+      movieId: movieId,
+      text: commentText,
+      timestamp: new Date().toISOString(),
+    });
+    console.log("Comment posted successfully");
+    return { status: true };
+  } catch (error) {
+    console.error("Error posting comment:", error);
+    return { status: false, error: error.message };
+  }
+};
+const validateComment = async (movieId, commentText, user) =>
+{
+    if(user != null)
+      {
+        return { status: false, error: "user is null"};
+      }
+      if(commentText != null)
+        {
+          return { status: false, error: "comment is null"};
+        }
+        if(movieId != null)
+          {
+            return { status: false, error: "movieID is null"};
+          }
+          return {status: true}
+}
+// Get comments for a specific movie
+export const getCommentsByMovieId = async (movieId) => {
+  try {
+    // Query comments collection to get comments for the specified movieId
+    const commentsQuery = query(
+      collection(db, "comments"),
+      where("movieId", "==", movieId)
+    );
+
+    const commentsSnapshot = await getDocs(commentsQuery);
+    const comments = [];
+    commentsSnapshot.forEach((doc) => {
+      comments.push({ id: doc.id, ...doc.data() });
+    });
+    return comments;
+  } catch (error) {
+    console.error("Error getting comments:", error);
+    return [];
   }
 };
 
