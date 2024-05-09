@@ -10,6 +10,7 @@ import Register from "./frontend/pages/RegisterWindow";
 import HomePage from "./frontend/pages/MainWindow";
 import AddMovie from "./frontend/components/addMovie";
 import EditMovie from "./frontend/components/editMovie";
+import MovieListModal from "./frontend/components/movieList";
 import MovieList from "./frontend/pages/MovieListWindow";
 import RoomPage from "./frontend/pages/RoomWindow";
 import MovieInformation from "./frontend/pages/MovieInformationWindow";
@@ -18,8 +19,10 @@ function App() {
   const [ShowMovieAddForm, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editMovieData, setEditMovieData] = useState(null);
+  const [ShowMovieListForm, setShowMovieListModal] = useState(false);
 
   const toggleModal = () => setShowModal(!ShowMovieAddForm);
+  const toggleMovieListModal = () => setShowMovieListModal(!ShowMovieListForm);
   const toggleEditModal = (movieData) => {
     setShowEditModal(!showEditModal);
     setEditMovieData(movieData);
@@ -29,6 +32,10 @@ function App() {
     <Router>
       <Navbar />
       <AddMovie showModal={ShowMovieAddForm} onCloseModal={toggleModal} />
+      <MovieListModal
+        showMovieListModal={ShowMovieListForm}
+        onCloseModal={toggleMovieListModal}
+      />
       <EditMovie
         showEditModal={showEditModal}
         onCloseEditModal={toggleEditModal}
@@ -38,7 +45,10 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/room" element={<RoomPage />} />
+        <Route
+          path="/room"
+          element={<RoomPage showMovieListModal={toggleMovieListModal} />}
+        />
         <Route
           path="/movieInformation"
           element={<MovieInformation onShowEditModal={toggleEditModal} />}

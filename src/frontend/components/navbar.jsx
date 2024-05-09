@@ -7,20 +7,35 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import Modal from "react-bootstrap/Modal";
-import { useAuth } from '../../authContext';
+import { useAuth } from "../../authContext";
+import { addRoom } from "../../backend/controllers/roomController.js";
 import "../css/navbar.css";
-
-
 
 import { auth } from "../../backend/controllers/firebase-config.js";
 
 const NavBar = () => {
-
   const { currentUser, logoutUser } = useAuth();
 
   const handleLogout = () => {
     // Call logout method from the authentication context
     logoutUser();
+  };
+
+  const openRoomCreationForm = () => {
+    const confirmed = window.confirm("Are you sure you want to create a room?");
+
+    if (confirmed) {
+      handleRoomCreation();
+    }
+  };
+
+  const handleRoomCreation = async () => {
+    const result = await addRoom(currentUser);
+    if (result.status) {
+      window.open(`/room?roomID=${result.roomId}`, "_self");
+    } else {
+      alert("There was a problem creating the room");
+    }
   };
 
   return (
@@ -36,7 +51,7 @@ const NavBar = () => {
             style={{ maxHeight: "100px" }}
             navbarScroll
           >
-            <Button className="navbar-button" href="/room"> {/* This should be a Nav.Link */}
+            <Button className="navbar-button" onClick={openRoomCreationForm}>
               Watch a movie!
             </Button>
             <Nav.Link className="navbar-text" href="/movies">
@@ -69,4 +84,3 @@ const NavBar = () => {
 };
 
 export default NavBar;
-
