@@ -85,10 +85,32 @@ const validateComment = async (movieId, commentText, user) =>
           }
           return {status: true}
 }
-// Get comments for a specific movie
+
+export const deleteComment = async (commentId) => {
+  try {
+    await deleteDoc(doc(db, "comments", commentId));
+    console.log("Comment deleted successfully");
+    return { status: true };
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    return { status: false, error: error.message };
+  }
+};
+
+export const editComment = async (commentId, newText) => {
+  try {
+    const commentRef = doc(db, "comments", commentId);
+    await updateDoc(commentRef, { text: newText });
+    console.log("Comment edited successfully");
+    return { status: true };
+  } catch (error) {
+    console.error("Error editing comment:", error);
+    return { status: false, error: error.message };
+  }
+};
+
 export const getCommentsByMovieId = async (movieId) => {
   try {
-    // Query comments collection to get comments for the specified movieId
     const commentsQuery = query(
       collection(db, "comments"),
       where("movieId", "==", movieId)

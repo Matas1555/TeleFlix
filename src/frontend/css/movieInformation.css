@@ -18,10 +18,17 @@
   -webkit-box-shadow: 1px 1px 32px 6px rgba(40, 48, 56, 0.75);
   -moz-box-shadow: 1px 1px 32px 6px rgba(40, 48, 56, 0.75);
 }
-
+.comment-container{
+  color: white;
+  width: 60%;
+  margin: auto;
+  
+}
 .comment{
   width: 100%;
   padding: 12px 20px;
+  margin-top: 20px;
+  margin-bottom: 20px;
   box-sizing: border-box;
   border: 2px solid #ccc;
   border-radius: 4px;
@@ -31,6 +38,7 @@
 
 .comment-field{
   width: 100%;
+  color: white;
   height: 150px;
   padding: 12px 20px;
   box-sizing: border-box;
@@ -40,15 +48,46 @@
   resize: none;
 }
 
-.comment-button{
+.comment-edit-field{
   width: 100%;
+  color: white;
+  height: 150px;
+  padding: 12px 20px;
+  border: none;
+  background-color: #1f1e1e;
+  resize: none;
+}
+
+.comment-button{
+  position: relative;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  width: 15%;
   background-color: #b83209;
   border: none;
   color: white;
-  padding: 16px 32px;
+  padding: 13px 5px;
   text-decoration: none;
-  margin: 4px 2px;
+  margin: 50px 2px;
   cursor: pointer;
+  
+}
+
+.comment-control{
+  position: relative;
+  left: 70%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  width: 8%;
+  background-color: #b83209;
+  border: none;
+  color: white;
+  padding: 13px 5px;
+  text-decoration: none;
+  margin: 20px 10px;
+  cursor: pointer;
+  
 }
 
 .title-year {
