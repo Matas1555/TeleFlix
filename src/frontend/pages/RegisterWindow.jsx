@@ -1,5 +1,5 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
+import React from "react";
+import ReactDOM from "react-dom";
 import "../css/login.css";
 import { useState, useRef } from "react";
 import { registerUser } from "../../backend/controllers/authController";
@@ -17,6 +17,7 @@ const Register = () => {
     const response = await registerUser(email, username, password);
     if (response.status) {
       alert("Registration successful!");
+      window.open(`/login`, "_self");
     } else {
       alert(`Registration failed: ${response.error}`);
     }

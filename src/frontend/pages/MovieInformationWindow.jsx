@@ -1,16 +1,16 @@
 import {
   deleteMovie,
   getMovie,
-  postComment, 
-  getCommentsByMovieId 
+  postComment,
+  getCommentsByMovieId,
 } from "../../backend/controllers/movieController";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/movieInformation.css";
-import { useAuth } from '../../authContext';
+import { useAuth } from "../../authContext";
 
 function MovieInformation({ onShowEditModal }) {
-  const { currentUser } = useAuth(); 
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [movie, setMovie] = useState(null);
   const [movieId, setMovieID] = useState(null);
@@ -31,12 +31,8 @@ function MovieInformation({ onShowEditModal }) {
       }
     };
 
-    
-    
     fetchMovieData();
-   
   }, []);
-
 
   useEffect(() => {
     if (movieId) {
@@ -46,7 +42,7 @@ function MovieInformation({ onShowEditModal }) {
 
   const handleCommentSubmit = async () => {
     try {
-      await postComment(movieId, commentText, currentUser );
+      await postComment(movieId, commentText, currentUser);
       const updatedComments = await getCommentsByMovieId(movieId);
       setComments(updatedComments);
       setCommentText(""); // Clear input after submission
@@ -55,14 +51,14 @@ function MovieInformation({ onShowEditModal }) {
     }
   };
 
-  const getComments = async() => {
+  const getComments = async () => {
     try {
       const comments = await getCommentsByMovieId(movieId);
       setComments(comments);
     } catch (error) {
       console.error("Error getting comments:", error);
     }
-  }
+  };
 
   const handleMovieDeletion = async () => {
     const confirmed = window.confirm(
@@ -113,24 +109,6 @@ function MovieInformation({ onShowEditModal }) {
               </div>
             </div>
 
-            <div>
-            <h3>Comments</h3>
-            <div className="comment-section">
-              {comments.map((comment , index) => (
-                <div key={index} className="comment">
-                  <b><p>{comment.user}</p></b>
-                  <p>{comment.text}</p>
-                </div>
-              ))}
-            </div>
-            <textarea className="comment-field"
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              placeholder="Add a comment..."
-            ></textarea>
-            <button className="comment-button" onClick={handleCommentSubmit}>Post Comment</button>
-          </div>
-
             {movie.director ? (
               <div>
                 <p className="actors-word">Director {movie.director}</p>
@@ -138,6 +116,29 @@ function MovieInformation({ onShowEditModal }) {
             ) : (
               <div></div>
             )}
+
+            <div>
+              <h3>Comments</h3>
+              <div className="comment-section">
+                {comments.map((comment, index) => (
+                  <div key={index} className="comment">
+                    <b>
+                      <p>{comment.user}</p>
+                    </b>
+                    <p>{comment.text}</p>
+                  </div>
+                ))}
+              </div>
+              <textarea
+                className="comment-field"
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder="Add a comment..."
+              ></textarea>
+              <button className="comment-button" onClick={handleCommentSubmit}>
+                Post Comment
+              </button>
+            </div>
           </div>
         </div>
       ) : (
