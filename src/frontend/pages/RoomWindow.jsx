@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import "../css/roomPage.css";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../../backend/controllers/firebase-config.js";
+import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
@@ -24,7 +25,7 @@ function RoomPage() {
   const [selectedMovieURL, setselectedMovieURL] = useState("");
   const [isRoomCreator, setIsRoomCreator] = useState(false);
   const [isMoviePlaying, setIsMoviePlaying] = useState(false);
-  const { currentUser, logoutUser } = useAuth();
+  const { currentUser } = useAuth();
   const playerRef = React.useRef(null);
   const videoJsOptions = {
     autoplay: false,
@@ -61,10 +62,13 @@ function RoomPage() {
         }
       });
 
+      //TODO currentUser returns null
       getRoomCreator(id)
         .then((creator) => {
+          console.log(currentUser);
           if (creator.status && creator.roomCreator === currentUser) {
             setIsRoomCreator(true);
+            console.log(currentUser);
           }
         })
         .catch((error) =>
@@ -150,6 +154,10 @@ function RoomPage() {
             </>
           ) : (
             <>
+              <button className="room-button" onClick={handleModalShow}>
+                Choose a movie
+              </button>
+              <button className="room-button">Vote for a movie</button>
               {selectedMovieURL && (
                 <VideoJS options={videoJsOptions} onReady={handlePlayerReady} />
               )}

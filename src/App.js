@@ -14,8 +14,9 @@ import MovieListModal from "./frontend/components/movieList";
 import MovieList from "./frontend/pages/MovieListWindow";
 import RoomPage from "./frontend/pages/RoomWindow";
 import MovieInformation from "./frontend/pages/MovieInformationWindow";
+import { AuthProvider } from "./authContext";
 
-function App() {
+const App = () => {
   const [ShowMovieAddForm, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editMovieData, setEditMovieData] = useState(null);
@@ -29,37 +30,39 @@ function App() {
   };
 
   return (
-    <Router>
-      <Navbar />
-      <AddMovie showModal={ShowMovieAddForm} onCloseModal={toggleModal} />
-      <MovieListModal
-        showMovieListModal={ShowMovieListForm}
-        onCloseModal={toggleMovieListModal}
-      />
-      <EditMovie
-        showEditModal={showEditModal}
-        onCloseEditModal={toggleEditModal}
-        movie={editMovieData} // Pass the movie data to the EditMovie modal
-      />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route
-          path="/room"
-          element={<RoomPage showMovieListModal={toggleMovieListModal} />}
+    <AuthProvider>
+      <Router>
+        <Navbar />
+        <AddMovie showModal={ShowMovieAddForm} onCloseModal={toggleModal} />
+        <MovieListModal
+          showMovieListModal={ShowMovieListForm}
+          onCloseModal={toggleMovieListModal}
         />
-        <Route
-          path="/movieInformation"
-          element={<MovieInformation onShowEditModal={toggleEditModal} />}
+        <EditMovie
+          showEditModal={showEditModal}
+          onCloseEditModal={toggleEditModal}
+          movie={editMovieData} // Pass the movie data to the EditMovie modal
         />
-        <Route
-          path="/movies"
-          element={<MovieList ShowMovieAddForm={toggleModal} />}
-        />
-      </Routes>
-    </Router>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/room"
+            element={<RoomPage showMovieListModal={toggleMovieListModal} />}
+          />
+          <Route
+            path="/movieInformation"
+            element={<MovieInformation onShowEditModal={toggleEditModal} />}
+          />
+          <Route
+            path="/movies"
+            element={<MovieList ShowMovieAddForm={toggleModal} />}
+          />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
-}
+};
 
 export default App;
