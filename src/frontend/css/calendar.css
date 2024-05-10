@@ -1,0 +1,10 @@
+.container {
+    color: white;
+    display: flex;
+    margin: 10vh 25vh 10vh 25vh;
+    gap: 10vh;
+  }
+  
+.event-day{
+    color: red;
+}

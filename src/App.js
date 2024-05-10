@@ -13,6 +13,7 @@ import EditMovie from "./frontend/components/editMovie";
 import MovieListModal from "./frontend/components/movieList";
 import MovieList from "./frontend/pages/MovieListWindow";
 import RoomPage from "./frontend/pages/RoomWindow";
+import Calendar from "./frontend/pages/CalendarWindow";
 import MovieInformation from "./frontend/pages/MovieInformationWindow";
 import { AuthProvider } from "./authContext";
 
@@ -58,6 +59,10 @@ const App = () => {
           <Route
             path="/movies"
             element={<MovieList ShowMovieAddForm={toggleModal} />}
+          />
+          <Route
+            path="/calendar"
+            element={<Calendar/>}
           />
         </Routes>
       </Router>
