@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      setCurrentUser({ email: email }); // Example to set more comprehensive user data
+      setCurrentUser(email); // Example to set more comprehensive user data
       return { status: true };
     } catch (error) {
       console.error("Error logging in:", error.message);
