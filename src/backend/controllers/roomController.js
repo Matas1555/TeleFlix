@@ -44,7 +44,7 @@ export const getRoomCreator = async (roomID) => {
     const roomDoc = await getDoc(roomRef);
     if (roomDoc.exists()) {
       const roomData = roomDoc.data();
-      return { status: true, roomCreator: roomData.roomCreator };
+      return { status: true, roomCreator: roomData.users[0] };
     } else {
       return { status: false, message: "Room does not exist" };
     }
@@ -87,14 +87,16 @@ export const updateRoomMovieStatus = async (roomID, movie) => {
       const roomData = roomDoc.data();
       if (movie != null) {
         await updateDoc(roomRef, {
+          isMoviePlaying: false,
           movieURL: movie,
-          isMoviePlaying: true,
+          currentTime: 0,
         });
         return { status: true, message: "Movie status updated successfully" };
       } else {
         await updateDoc(roomRef, {
-          movieURL: movie,
           isMoviePlaying: false,
+          movieURL: movie,
+          currentTime: 0,
         });
         return { status: true, message: "User already in the room" };
       }
@@ -105,6 +107,43 @@ export const updateRoomMovieStatus = async (roomID, movie) => {
     console.error("error updating movie status: ", e);
     return { status: false, message: e.message };
   }
+};
+
+export const updateRoomMoviePlayingStatus = async (roomID, isPlaying) => {
+  const roomRef = doc(db, "rooms", roomID);
+  try {
+    // First, check if the room exists and the user isn't already in the room
+    const roomDoc = await getDoc(roomRef);
+    if (roomDoc.exists()) {
+      const roomData = roomDoc.data();
+      if (roomData.movieURL != null) {
+        await updateDoc(roomRef, {
+          isMoviePlaying: isPlaying,
+        });
+        return {
+          status: true,
+          message: "Movie is playing: " + isPlaying,
+        };
+      } else {
+        await updateDoc(roomRef, {
+          isMoviePlaying: null,
+        });
+        return { status: true, message: "Movie not selected" };
+      }
+    } else {
+      return { status: false, message: "Room does not exist" };
+    }
+  } catch (e) {
+    console.error("error updating movie status: ", e);
+    return { status: false, message: e.message };
+  }
+};
+
+export const updateRoomMovieTimeStatus = async (roomID, currentTime) => {
+  const roomRef = doc(db, "rooms", roomID);
+  await updateDoc(roomRef, {
+    currentTime: currentTime,
+  });
 };
 
 function generateID() {

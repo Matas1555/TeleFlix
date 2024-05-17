@@ -1,11 +1,16 @@
 import React from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
+import {
+  updateRoomMoviePlayingStatus,
+  updateRoomMovieTimeStatus,
+} from "../../backend/controllers/roomController";
 
 export const VideoJS = (props) => {
   const videoRef = React.useRef(null);
   const playerRef = React.useRef(null);
-  const { options, onReady } = props;
+  const { options, onReady, room, isRoomCreator } = props;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
   React.useEffect(() => {
     // Make sure Video.js player is only initialized once
@@ -21,15 +26,38 @@ export const VideoJS = (props) => {
         onReady && onReady(player);
       }));
 
-      // You could update an existing player in the `else` block here
-      // on prop change, for example:
+      player.on("dblclick", () => {
+        if (!isRoomCreator) {
+          player.requestFullscreen();
+        }
+      });
+
+      player.on("play", () => {
+        updateRoomMoviePlayingStatus(room, true)
+          .then((result) => {
+            console.log(result.message);
+          })
+          .catch(console.error);
+        //updateRoomMovieTimeStatus(room, player.currentTime());
+        console.log(player.currentTime());
+      });
+
+      player.on("pause", () => {
+        updateRoomMoviePlayingStatus(room, false)
+          .then((result) => {
+            console.log(result.message);
+          })
+          .catch(console.error);
+        //updateRoomMovieTimeStatus(room, player.currentTime());
+        console.log(player.currentTime());
+      });
     } else {
       const player = playerRef.current;
 
       player.autoplay(options.autoplay);
       player.src(options.sources);
     }
-  }, [options, videoRef]);
+  }, [options, room, videoRef]);
 
   // Dispose the Video.js player when the functional component unmounts
   React.useEffect(() => {
@@ -42,6 +70,18 @@ export const VideoJS = (props) => {
       }
     };
   }, [playerRef]);
+
+  React.useEffect(() => {
+    const player = playerRef.current;
+
+    if (player) {
+      // Only update the source if it has changed
+      const currentSource = player.currentSource();
+      if (options.sources[0].src !== currentSource) {
+        player.src(options.sources);
+      }
+    }
+  }, [options.sources]);
 
   return (
     <div data-vjs-player>

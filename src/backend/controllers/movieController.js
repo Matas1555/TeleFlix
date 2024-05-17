@@ -15,8 +15,8 @@ import {
   updateDoc,
   deleteDoc,
   getDoc,
-  query, 
-  where
+  query,
+  where,
 } from "firebase/firestore";
 
 // Create a new movie
@@ -39,6 +39,7 @@ export const addMovie = async (movieData, file) => {
       year: movieData.year,
       posterURL: movieData.posterURL,
       movieURL: movieURL,
+      currentTime: 0.0,
       movieRef: `movies/${file.name}`,
     });
     console.log("Movie added successfully");
@@ -51,11 +52,10 @@ export const addMovie = async (movieData, file) => {
 
 export const postComment = async (movieId, commentText, user) => {
   try {
-    const validate = await validateComment(movieId, commentText, user)
-    if(validate != true)
-      {
-        console.error("Error posting comment:", "Validation failed");
-      }
+    const validate = await validateComment(movieId, commentText, user);
+    if (validate != true) {
+      console.error("Error posting comment:", "Validation failed");
+    }
     await addDoc(collection(db, "comments"), {
       user: user,
       movieId: movieId,
@@ -69,22 +69,18 @@ export const postComment = async (movieId, commentText, user) => {
     return { status: false, error: error.message };
   }
 };
-const validateComment = async (movieId, commentText, user) =>
-{
-    if(user != null)
-      {
-        return { status: false, error: "user is null"};
-      }
-      if(commentText != null)
-        {
-          return { status: false, error: "comment is null"};
-        }
-        if(movieId != null)
-          {
-            return { status: false, error: "movieID is null"};
-          }
-          return {status: true}
-}
+const validateComment = async (movieId, commentText, user) => {
+  if (user != null) {
+    return { status: false, error: "user is null" };
+  }
+  if (commentText != null) {
+    return { status: false, error: "comment is null" };
+  }
+  if (movieId != null) {
+    return { status: false, error: "movieID is null" };
+  }
+  return { status: true };
+};
 
 export const deleteComment = async (commentId) => {
   try {

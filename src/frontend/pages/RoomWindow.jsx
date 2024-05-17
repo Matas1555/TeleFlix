@@ -14,6 +14,8 @@ import { getMovieList } from "../../backend/controllers/movieController";
 import {
   updateRoomMovieStatus,
   getRoomCreator,
+  updateRoomMoviePlayingStatus,
+  updateRoomMovieTimeStatus,
 } from "../../backend/controllers/roomController";
 import VideoJS from "../components/VideoJS";
 import { useAuth } from "../../authContext";
@@ -27,18 +29,24 @@ function RoomPage() {
   const [isMoviePlaying, setIsMoviePlaying] = useState(false);
   const { currentUser } = useAuth();
   const playerRef = React.useRef(null);
-  const videoJsOptions = {
-    autoplay: false,
-    controls: true,
-    responsive: true,
-    fluid: true,
-    sources: [
-      {
-        src: selectedMovieURL,
-        type: "video/mp4",
+  const videoJsOptions = React.useMemo(
+    () => ({
+      autoplay: false,
+      controls: isRoomCreator,
+      responsive: true,
+      fluid: true,
+      userActions: {
+        doubleClick: !isRoomCreator,
       },
-    ],
-  };
+      sources: [
+        {
+          src: selectedMovieURL,
+          type: "video/mp4",
+        },
+      ],
+    }),
+    [selectedMovieURL, isRoomCreator]
+  );
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -48,32 +56,60 @@ function RoomPage() {
     if (id) {
       const roomRef = doc(db, "rooms", id);
 
-      const unsubscribe = onSnapshot(roomRef, (doc) => {
-        if (doc.exists()) {
-          console.log("Current data:", doc.data());
-          const roomData = doc.data();
-          setUsers(roomData.users || []);
-          if (roomData.isMoviePlaying) {
-            setselectedMovieURL(roomData.movieURL);
-          }
-          console.log(`Updated users in room ${id}:`, roomData.users); // Log when users array changes
-        } else {
-          console.log("No such room!");
-        }
-      });
-
-      //TODO currentUser returns null
       getRoomCreator(id)
         .then((creator) => {
-          console.log(currentUser);
           if (creator.status && creator.roomCreator === currentUser) {
             setIsRoomCreator(true);
-            console.log(currentUser);
+            console.log("user is creator " + currentUser);
+          } else {
+            console.log("user is not creator");
           }
         })
         .catch((error) =>
           console.error("Failed to fetch room creator:", error)
         );
+
+      const unsubscribe = onSnapshot(roomRef, (doc) => {
+        if (doc.exists()) {
+          console.log("Current data:", doc.data());
+          const roomData = doc.data();
+          setUsers(roomData.users || []);
+
+          if (
+            roomData.movieURL != null &&
+            roomData.movieURL !== selectedMovieURL
+          ) {
+            console.log("movie url was changed");
+            setselectedMovieURL(roomData.movieURL);
+          }
+          console.log(`Updated users in room ${id}:`, roomData.users); // Log when users array changes
+
+          // if (roomData.isMoviePlaying !== isMoviePlaying) {
+          //   setIsMoviePlaying(roomData.isMoviePlaying);
+          //   if (playerRef.current) {
+          //     console.log("player is playing");
+          //   }
+          // }
+
+          if (!isRoomCreator) {
+            if (roomData.isMoviePlaying) {
+              handlePlay();
+            } else {
+              handlePause();
+            }
+
+            // if (
+            //   playerRef.current &&
+            //   Math.abs(playerRef.current.currentTime() - roomData.currentTime) >
+            //     1
+            // ) {
+            //   playerRef.current.currentTime(roomData.currentTime);
+            // }
+          }
+        } else {
+          console.log("No such room!");
+        }
+      });
 
       // Cleanup this component
       return () => unsubscribe();
@@ -96,16 +132,29 @@ function RoomPage() {
     handleModalClose();
   };
 
+  const handlePlay = async () => {
+    try {
+      await playerRef.current.play();
+    } catch (error) {
+      console.error("Error playing the video:", error);
+    }
+  };
+
+  const handlePause = async () => {
+    try {
+      if (!playerRef.current.paused()) {
+        await playerRef.current.pause();
+      }
+    } catch (error) {
+      console.error("Error pausing the video:", error);
+    }
+  };
+
   const handleModalShow = () => setShowModal(true);
   const handleModalClose = () => setShowModal(false);
 
-  const handlePlayerReady = (player) => {
+  const handlePlayerReady = async (player) => {
     playerRef.current = player;
-
-    // You can handle player events here, for example:
-    player.on("waiting", () => {
-      console.log("player is waiting");
-    });
 
     player.on("dispose", () => {
       console.log("player will dispose");
@@ -144,22 +193,24 @@ function RoomPage() {
         <div className="movieContainer">
           {isRoomCreator ? (
             <>
-              <button className="room-button" onClick={handleModalShow}>
-                Choose a movie
-              </button>
-              <button className="room-button">Vote for a movie</button>
               {selectedMovieURL && (
-                <VideoJS options={videoJsOptions} onReady={handlePlayerReady} />
+                <VideoJS
+                  options={videoJsOptions}
+                  onReady={handlePlayerReady}
+                  room={roomID}
+                  isRoomCreator={isRoomCreator}
+                />
               )}
             </>
           ) : (
             <>
-              <button className="room-button" onClick={handleModalShow}>
-                Choose a movie
-              </button>
-              <button className="room-button">Vote for a movie</button>
               {selectedMovieURL && (
-                <VideoJS options={videoJsOptions} onReady={handlePlayerReady} />
+                <VideoJS
+                  options={videoJsOptions}
+                  onReady={handlePlayerReady}
+                  room={roomID}
+                  isRoomCreator={isRoomCreator}
+                />
               )}
             </>
           )}
@@ -175,6 +226,17 @@ function RoomPage() {
             <button className="room-button">Start game</button>
             <button className="room-button">Predict what happens</button>
           </div>
+          {isRoomCreator ? (
+            <div className="sidebarButtons">
+              <button className="room-button" onClick={handleModalShow}>
+                Choose a movie
+              </button>
+              <button className="room-button">Vote for a movie</button>
+            </div>
+          ) : (
+            <></>
+          )}
+
           <div className="message-window">
             <div className="messages">
               <p className="user_name">useername123</p>
