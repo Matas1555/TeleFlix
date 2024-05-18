@@ -17,7 +17,32 @@ import {
     query,
     where,
 } from "firebase/firestore";
-
+const validateList = async (list) =>
+{
+    try {
+        if (list.length === 0) { return false; }
+        else return true;
+    }
+    catch (e) { console.error("Error validating user movie history list", e); return false; }
+}
+export const getRecommendations = async (user) => {
+    try {
+        const movies = await getAllMovieList();
+        const history = await getMovieHistoryEntries();
+        const users = await getUsers();
+        const currentuserList = await GetCurrentUserEntryList(user, history);
+        const validate = await validateList(currentuserList);
+        if (validate) {
+            return movies;
+        }
+        else {
+            return movies;
+        }
+    } catch (e) {
+        console.error("Error getting recommendations: ", e);
+        return [];
+    }
+}
 export const getAllMovieList = async () => {
     try {
         const moviesSnapshot = await getDocs(collection(db, "movies"));
@@ -57,6 +82,12 @@ export const getUsers = async () => {
         return [];
     }
 };
-const GetCurrentUserEntryList = async (user) => {
-    
+const GetCurrentUserEntryList = async (user, history) => {
+    try {
+        return history.filter(entry => entry.User === user);
+    }
+    catch (e)
+    {
+        console.error("Error getting current user history entry list", e)
+    }
 };

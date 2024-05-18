@@ -18,6 +18,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import { getRecommendations } from "./recommendationController";
 
 // Create a new movie
 export const addMovie = async (movieData, file) => {
@@ -141,13 +142,10 @@ export const getMovie = async (movieId) => {
 };
 
 // Read all movies
-export const getMovieList = async () => {
+export const getMovieList = async (user) => {
   try {
-    const moviesSnapshot = await getDocs(collection(db, "movies"));
-    const movies = [];
-    moviesSnapshot.forEach((doc) => {
-      movies.push({ id: doc.id, ...doc.data() });
-    });
+    console.log(user);
+    const movies = await getRecommendations(user);
     return movies;
   } catch (e) {
     console.error("Error getting movies: ", e);
