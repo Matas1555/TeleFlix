@@ -18,7 +18,7 @@ import {
   arrayUnion,
 } from "firebase/firestore";
 
-export const addRoom = async (userName) => {
+export const createRoom = async (userName) => {
   const roomID = generateID();
   try {
     const roomRef = doc(db, "rooms", roomID);
@@ -54,7 +54,7 @@ export const getRoomCreator = async (roomID) => {
   }
 };
 
-export const joinRoom = async (roomID, userName) => {
+export const addUserToRoom = async (roomID, userName) => {
   const roomRef = doc(db, "rooms", roomID);
   try {
     // First, check if the room exists and the user isn't already in the room
@@ -143,6 +143,13 @@ export const updateRoomMovieTimeStatus = async (roomID, currentTime) => {
   const roomRef = doc(db, "rooms", roomID);
   await updateDoc(roomRef, {
     currentTime: currentTime,
+  });
+};
+
+export const closeMovie = async (roomID) => {
+  const roomRef = doc(db, "rooms", roomID);
+  await updateDoc(roomRef, {
+    movieURL: "",
   });
 };
 

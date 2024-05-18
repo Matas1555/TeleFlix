@@ -8,7 +8,7 @@ import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import Modal from "react-bootstrap/Modal";
 import { useAuth } from "../../authContext";
-import { addRoom } from "../../backend/controllers/roomController.js";
+import { createRoom } from "../../backend/controllers/roomController.js";
 import "../css/navbar.css";
 
 import { auth } from "../../backend/controllers/firebase-config.js";
@@ -30,7 +30,7 @@ const NavBar = () => {
   };
 
   const handleRoomCreation = async () => {
-    const result = await addRoom(currentUser);
+    const result = await createRoom(currentUser);
     if (result.status) {
       window.open(`/room?roomID=${result.roomId}`, "_self");
     } else {

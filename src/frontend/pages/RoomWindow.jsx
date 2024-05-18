@@ -16,6 +16,8 @@ import {
   getRoomCreator,
   updateRoomMoviePlayingStatus,
   updateRoomMovieTimeStatus,
+  closeMovie,
+  addUserToRoom,
 } from "../../backend/controllers/roomController";
 import VideoJS from "../components/VideoJS";
 import { useAuth } from "../../authContext";
@@ -53,7 +55,16 @@ function RoomPage() {
     const id = queryParams.get("roomID");
     setRoomID(id);
 
+    const newUser = async (roomID) => {
+      const result = await addUserToRoom(roomID, currentUser);
+      if (result.status) {
+        console.log("new user joined by link");
+      }
+      //setUsers(roomData.users || []);
+    };
+
     if (id) {
+      newUser(id);
       const roomRef = doc(db, "rooms", id);
 
       getRoomCreator(id)
@@ -73,6 +84,7 @@ function RoomPage() {
         if (doc.exists()) {
           console.log("Current data:", doc.data());
           const roomData = doc.data();
+
           setUsers(roomData.users || []);
 
           if (
@@ -81,6 +93,8 @@ function RoomPage() {
           ) {
             console.log("movie url was changed");
             setselectedMovieURL(roomData.movieURL);
+          } else {
+            setselectedMovieURL("");
           }
           console.log(`Updated users in room ${id}:`, roomData.users); // Log when users array changes
 
@@ -126,10 +140,16 @@ function RoomPage() {
     getMovies();
   }, []);
 
-  const selectMovie = (movieURL) => {
+  const handleMovieSelection = (movieURL) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to select this movie?"
+    );
+
+    if (confirmed) {
+      updateRoomMovieStatus(roomID, movieURL);
+      handleModalClose();
+    }
     //setselectedMovieURL(movieURL);
-    updateRoomMovieStatus(roomID, movieURL);
-    handleModalClose();
   };
 
   const handlePlay = async () => {
@@ -150,7 +170,12 @@ function RoomPage() {
     }
   };
 
-  const handleModalShow = () => setShowModal(true);
+  const handleMovieClose = () => {
+    closeMovie(roomID);
+    setselectedMovieURL("");
+  };
+
+  const openMovieSelectionForm = () => setShowModal(true);
   const handleModalClose = () => setShowModal(false);
 
   const handlePlayerReady = async (player) => {
@@ -179,7 +204,9 @@ function RoomPage() {
                     {/* Assuming each movie object has a 'title' property */}
                   </Col>
                   <Col>
-                    <Button onClick={() => selectMovie(movie.movieURL)}>
+                    <Button
+                      onClick={() => handleMovieSelection(movie.movieURL)}
+                    >
                       Select Movie
                     </Button>{" "}
                     {/* Add your selectMovie function if needed */}
@@ -191,6 +218,15 @@ function RoomPage() {
       </Modal>
       <div className="roomContainer">
         <div className="movieContainer">
+          {selectedMovieURL ? (
+            <>
+              <button onClick={handleMovieClose} className="movieCloseButton">
+                X
+              </button>
+            </>
+          ) : (
+            <></>
+          )}
           {isRoomCreator ? (
             <>
               {selectedMovieURL && (
@@ -228,7 +264,7 @@ function RoomPage() {
           </div>
           {isRoomCreator ? (
             <div className="sidebarButtons">
-              <button className="room-button" onClick={handleModalShow}>
+              <button className="room-button" onClick={openMovieSelectionForm}>
                 Choose a movie
               </button>
               <button className="room-button">Vote for a movie</button>
