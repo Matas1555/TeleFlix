@@ -5,17 +5,18 @@ import {
   deleteMovie,
   updateMovie,
 } from "../../backend/controllers/movieController";
+import { useAuth } from '../../authContext';
 
 function MovieList({ ShowMovieAddForm }) {
   const [movies, setMovies] = useState([]);
-  const [editedMovie, setEditedMovie] = useState(null);
-
+    const [editedMovie, setEditedMovie] = useState(null);
+    const { currentUser } = useAuth()
   useEffect(() => {
-    const fetchMovies = async () => {
-      const loadedMovies = await getMovieList();
-      if (loadedMovies) {
-        setMovies(loadedMovies);
-      }
+      const fetchMovies = async () => {
+          const loadedMovies = await getMovieList(currentUser);
+        if (loadedMovies) {
+            setMovies(loadedMovies);
+        }
     };
     fetchMovies();
   }, []);
