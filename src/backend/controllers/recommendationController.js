@@ -41,7 +41,7 @@ const prepareData = async (users, history, user) => {
         }
         return userHistories;
     } catch (e) {
-        console.error("error mapping user/history lists", e)
+        console.error("error mapping user/history lists", e);
         return [];
     }
 }
@@ -56,7 +56,7 @@ const computeJaccardIndex = async (list1, list2, index) =>
         let jaccardIndex = intersection.size / union.size;
         return { index, jaccardIndex };
     } catch (e) {
-        console.log("error computing jaccard index", e)
+        console.log("error computing jaccard index", e);
         return -1;
     }
 }
@@ -81,8 +81,54 @@ const selectListsMeetingIndexThreshold = async (filteredIndices, MappedData, cur
         }
         return recommendations;
     } catch (e) {
-        console.log("error getting recommendations from lists meeting index threshold", e)
+        console.log("error getting recommendations from lists meeting index threshold", e);
         return [];
+    }
+}
+const getUserNationality = async (user) =>
+{
+    try {
+        if (user?.nationality != null) {
+            return user.nationality;
+        }
+        else {
+            return -1;
+        }
+    }
+    catch (e) {
+        console.log("error getting user nationality", e);
+        return -1
+    }
+}
+const getUserIP = async () => {
+    try {
+        return fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.ip);
+            })
+            .catch(error => {
+                console.log('Error:', error);
+            });
+    }
+    catch (e) {
+        console.log("error getting user ip", e);
+        return null;
+    }
+}
+const getUserISPNationality = async () => {
+    try {
+        return fetch('https://api.ipregistry.co/?key=tryout')
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (payload) {
+                console.log(payload.location.country.name);
+            });
+    }
+    catch (e) {
+        console.log("error getting user isp nationality", e);
+        return null;
     }
 }
 export const getRecommendations = async (user) => {
@@ -106,10 +152,18 @@ export const getRecommendations = async (user) => {
             const recommendedMovies = movies.filter(movie => recommendations.includes(movie.title));
             const movieList = [...recommendedMovies, ...movies];
             const uniqueMovies = movieList.filter((movie, index, self) => self.findIndex(m => m.id === movie.id) === index);
-            console.log(uniqueMovies);
             return uniqueMovies;
         }
         else {
+            let nationality = -1;
+            if (nationality === -1) {
+                nationality = await getUserNationality(user);
+            }
+            if (nationality === -1) {
+                const userIP = await getUserIP();
+                nationality = getUserISPNationality();
+            }
+            if (nationality === -1) return movies;
             return movies;
         }
     } catch (e) {
@@ -162,7 +216,7 @@ const GetCurrentUserEntryList = async (user, history) => {
     }
     catch (e)
     {
-        console.error("Error getting current user history entry list", e)
+        console.error("Error getting current user history entry list", e);
         return [];
     }
 };
