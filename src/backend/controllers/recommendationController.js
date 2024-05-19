@@ -45,7 +45,7 @@ const prepareData = async (users, history, user) => {
         return [];
     }
 }
-const computeJaccardIndex = async (list1, list2) =>
+const computeJaccardIndex = async (list1, list2, index) =>
 {
     try {
         list1.shift();
@@ -54,10 +54,35 @@ const computeJaccardIndex = async (list1, list2) =>
         let intersection = new Set([...set1].filter(item => set2.has(item)));
         let union = new Set([...set1, ...set2]);
         let jaccardIndex = intersection.size / union.size;
-        return jaccardIndex;
+        return { index, jaccardIndex };
     } catch (e) {
         console.log("error computing jaccard index", e)
         return -1;
+    }
+}
+const selectListsMeetingIndexThreshold = async (filteredIndices, MappedData, current) => {
+    try {
+        const recommendations = [];
+        for (let i = 0; i < filteredIndices.length; i++) {
+            const index = filteredIndices[i].index;
+            const userMovies = MappedData[index];
+            for (const movie of userMovies) {
+                if (current.includes(movie)) continue;
+                if (!recommendations.includes(movie)) {
+                    recommendations.push(movie);
+                    if (recommendations.length === 10) {
+                        break;
+                    }
+                }
+            }
+            if (recommendations.length === 10) {
+                break;
+            }
+        }
+        return recommendations;
+    } catch (e) {
+        console.log("error getting recommendations from lists meeting index threshold", e)
+        return [];
     }
 }
 export const getRecommendations = async (user) => {
@@ -71,14 +96,18 @@ export const getRecommendations = async (user) => {
             const MappedData = await prepareData(users, history, user)
             const promises = [];
             for (let i = 0; i < MappedData.length; i++) {
-                promises.push(computeJaccardIndex(MappedData[i], currentuserList));
+                promises.push(computeJaccardIndex(MappedData[i], currentuserList, i));
             }
             const jaccardIndex = await Promise.all(promises);
-            jaccardIndex.sort((a, b) => b - a);
-            console.log(MappedData);
-            console.log(currentuserList);
-            console.log(jaccardIndex);
-            return movies;
+            const filteredIndices = jaccardIndex.filter(obj => obj.jaccardIndex >= 0.5);
+            if (filteredIndices.length === 0) { return movies; }
+            filteredIndices.sort((a, b) => b.jaccardIndex - a.jaccardIndex);
+            const recommendations = await selectListsMeetingIndexThreshold(filteredIndices, MappedData, currentuserList);
+            const recommendedMovies = movies.filter(movie => recommendations.includes(movie.title));
+            const movieList = [...recommendedMovies, ...movies];
+            const uniqueMovies = movieList.filter((movie, index, self) => self.findIndex(m => m.id === movie.id) === index);
+            console.log(uniqueMovies);
+            return uniqueMovies;
         }
         else {
             return movies;
