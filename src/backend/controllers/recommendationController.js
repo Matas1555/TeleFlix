@@ -129,12 +129,54 @@ const getUserISPNationality = async (ip) => {
         return null;
     }
 }
-const selectGlobalTrending = async () => {
+
+const selectGlobalTrending = async (history) => {
+    try {
+        const seconds = new Date().getTime() / 1000
+        history = history.filter(entry => entry.Time.seconds > seconds - 2628000).map(entry => entry.Movie);
+        const movieCounts = history.reduce((acc, movie) => {
+            if (acc[movie]) {
+                acc[movie]++;
+            } else {
+                acc[movie] = 1;
+            }
+            return acc;
+        }, {});
+        const list = Object.entries(movieCounts).map(([movie, count]) => ({
+            movie,
+            count
+        }));
+        return list;
+    }
+    catch (e) {
+        console.log("error getting global trending list", e);
+        return [];
+    }
+}
+const getNationalHistoryList = async () => {
     try {
         return [];
     }
     catch (e) {
-        console.log("error getting global trending list", e);
+        console.log("error getting national history list", e);
+        return [];
+    }
+}
+const selectTrending = async () => {
+    try {
+        return [];
+    }
+    catch (e) {
+        console.log("error getting trending list", e);
+        return [];
+    }
+}
+const sortByViewCount = async (history) => {
+    try {
+        return [];
+    }
+    catch (e) {
+        console.log("error sorting list by view count", e);
         return [];
     }
 }
@@ -170,13 +212,23 @@ export const getRecommendations = async (user) => {
                 const userIP = await getUserIP();
                 nationality = await getUserISPNationality(userIP);
             }
-            const movieList = [];
             if (nationality === -1) {
-                movieList = await selectGlobalTrending();
-                return movies;
+                const movieList = await selectGlobalTrending(history);
+                movieList.sort((a, b) => b.count - a.count);
+                const sortedMovieTitles = movieList.map(entry => entry.movie);
+                const recommendationList = sortedMovieTitles.flatMap(title => {
+                    const movie = movies.find(movie => movie.title === title);
+                    return movie ? [movie] : [];
+                }).concat(movies.filter(movie => !sortedMovieTitles.includes(movie.title)));
+                return recommendationList;
             }
             else {
-                return movies;
+                const movieList = await getNationalHistoryList();
+                const trendingList = await selectTrending();
+                trendingList = await sortByViewCount(trendingList);
+                const recommendedMovies = movies.filter(movie => movieList.includes(movie.title));
+                const recommendationList = [...recommendedMovies, ...movies];
+                return recommendationList;
             }
         }
     } catch (e) {
