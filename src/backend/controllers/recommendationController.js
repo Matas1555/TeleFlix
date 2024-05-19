@@ -41,7 +41,23 @@ const prepareData = async (users, history, user) => {
         }
         return userHistories;
     } catch (e) {
-        console.error("error mapping user/history lists")
+        console.error("error mapping user/history lists", e)
+        return [];
+    }
+}
+const computeJaccardIndex = async (list1, list2) =>
+{
+    try {
+        list1.shift();
+        let set1 = new Set(list1);
+        let set2 = new Set(list2);
+        let intersection = new Set([...set1].filter(item => set2.has(item)));
+        let union = new Set([...set1, ...set2]);
+        let jaccardIndex = intersection.size / union.size;
+        return jaccardIndex;
+    } catch (e) {
+        console.log("error computing jaccard index", e)
+        return -1;
     }
 }
 export const getRecommendations = async (user) => {
@@ -53,7 +69,15 @@ export const getRecommendations = async (user) => {
         const validate = await validateList(currentuserList);
         if (validate) {
             const MappedData = await prepareData(users, history, user)
-
+            const promises = [];
+            for (let i = 0; i < MappedData.length; i++) {
+                promises.push(computeJaccardIndex(MappedData[i], currentuserList));
+            }
+            const jaccardIndex = await Promise.all(promises);
+            jaccardIndex.sort((a, b) => b - a);
+            console.log(MappedData);
+            console.log(currentuserList);
+            console.log(jaccardIndex);
             return movies;
         }
         else {
@@ -105,10 +129,11 @@ export const getUsers = async () => {
 };
 const GetCurrentUserEntryList = async (user, history) => {
     try {
-        return history.filter(entry => entry.User === user);
+        return history.filter(entry => entry.User === user).map(entry => entry.Movie);
     }
     catch (e)
     {
         console.error("Error getting current user history entry list", e)
+        return [];
     }
 };
