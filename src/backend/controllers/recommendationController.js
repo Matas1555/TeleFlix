@@ -25,6 +25,25 @@ const validateList = async (list) =>
     }
     catch (e) { console.error("Error validating user movie history list", e); return false; }
 }
+const prepareData = async (users, history, user) => {
+    try {
+        const userHistories = [];
+        for (let i = 0; i < users.length; i++) {
+            const email = users[i].email;
+            if (email === user) continue;
+            const historyArray = [email];
+            for (let o = 0; o < history.length; o++) {
+                if (email === history[o].User) {
+                    historyArray.push(history[o].Movie);
+                }
+            }
+            userHistories.push(historyArray);
+        }
+        return userHistories;
+    } catch (e) {
+        console.error("error mapping user/history lists")
+    }
+}
 export const getRecommendations = async (user) => {
     try {
         const movies = await getAllMovieList();
@@ -33,6 +52,8 @@ export const getRecommendations = async (user) => {
         const currentuserList = await GetCurrentUserEntryList(user, history);
         const validate = await validateList(currentuserList);
         if (validate) {
+            const MappedData = await prepareData(users, history, user)
+
             return movies;
         }
         else {

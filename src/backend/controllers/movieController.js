@@ -145,8 +145,13 @@ export const getMovie = async (movieId) => {
 export const getMovieList = async (user) => {
   try {
     console.log(user);
-    const movies = await getRecommendations(user);
-    return movies;
+      const recommendations = await getRecommendations(user);
+      const moviesSnapshot = await getDocs(collection(db, "movies"));
+      const movies = [];
+      moviesSnapshot.forEach((doc) => {
+          movies.push({ id: doc.id, ...doc.data() });
+      });
+      return recommendations;
   } catch (e) {
     console.error("Error getting movies: ", e);
     return [];
