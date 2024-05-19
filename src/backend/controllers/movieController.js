@@ -144,7 +144,6 @@ export const getMovie = async (movieId) => {
 // Read all movies
 export const getMovieList = async (user) => {
   try {
-    console.log(user);
       const recommendations = await getRecommendations(user);
       const moviesSnapshot = await getDocs(collection(db, "movies"));
       const movies = [];

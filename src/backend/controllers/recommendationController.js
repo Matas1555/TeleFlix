@@ -105,7 +105,7 @@ const getUserIP = async () => {
         return fetch('https://api.ipify.org?format=json')
             .then(response => response.json())
             .then(data => {
-                console.log(data.ip);
+                return data.ip;
             })
             .catch(error => {
                 console.log('Error:', error);
@@ -113,22 +113,29 @@ const getUserIP = async () => {
     }
     catch (e) {
         console.log("error getting user ip", e);
+        return -1;
+    }
+}
+const getUserISPNationality = async (ip) => {
+    try {
+        const response = await fetch(`https://api.country.is/${ip}?json`);
+        if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.statusText}`);
+        }
+        const data = await response.json();
+        return data.country;
+    } catch (error) {
+        console.error('Error fetching IP information:', error);
         return null;
     }
 }
-const getUserISPNationality = async () => {
+const selectGlobalTrending = async () => {
     try {
-        return fetch('https://api.ipregistry.co/?key=tryout')
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (payload) {
-                console.log(payload.location.country.name);
-            });
+        return [];
     }
     catch (e) {
-        console.log("error getting user isp nationality", e);
-        return null;
+        console.log("error getting global trending list", e);
+        return [];
     }
 }
 export const getRecommendations = async (user) => {
@@ -161,10 +168,16 @@ export const getRecommendations = async (user) => {
             }
             if (nationality === -1) {
                 const userIP = await getUserIP();
-                nationality = getUserISPNationality();
+                nationality = await getUserISPNationality(userIP);
             }
-            if (nationality === -1) return movies;
-            return movies;
+            const movieList = [];
+            if (nationality === -1) {
+                movieList = await selectGlobalTrending();
+                return movies;
+            }
+            else {
+                return movies;
+            }
         }
     } catch (e) {
         console.error("Error getting recommendations: ", e);
