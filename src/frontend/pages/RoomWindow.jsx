@@ -10,14 +10,20 @@ import Modal from "react-bootstrap/Modal";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
+import Timer from "../components/timer.jsx";
 import { getMovieList } from "../../backend/controllers/movieController";
 import {
   updateRoomMovieStatus,
   getRoomCreator,
   updateRoomMoviePlayingStatus,
   updateRoomMovieTimeStatus,
+  updateUserMovieHistory,
+  updateRoomVoteStatus,
   closeMovie,
   addUserToRoom,
+  createVote,
+  addVotes,
+  countVotes,
 } from "../../backend/controllers/roomController";
 import VideoJS from "../components/VideoJS";
 import { useAuth } from "../../authContext";
@@ -26,9 +32,13 @@ function RoomPage() {
   const [roomID, setRoomID] = useState("");
   const [users, setUsers] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showVoteModal, setShowVoteModal] = useState(false);
   const [selectedMovieURL, setselectedMovieURL] = useState("");
   const [isRoomCreator, setIsRoomCreator] = useState(false);
   const [isMoviePlaying, setIsMoviePlaying] = useState(false);
+  const [votedMovie, setVotedMovie] = useState("");
+  const [movieList, setMovieList] = useState(null);
+  const [buttonsDisabled, setButtonsDisabled] = useState(true);
   const { currentUser } = useAuth();
   const playerRef = React.useRef(null);
   const videoJsOptions = React.useMemo(
@@ -120,6 +130,14 @@ function RoomPage() {
             //   playerRef.current.currentTime(roomData.currentTime);
             // }
           }
+
+          if (roomData.hasVotingStarted) {
+            setButtonsDisabled(false);
+            setShowVoteModal(true);
+          } else {
+            setButtonsDisabled(false);
+            setShowVoteModal(false);
+          }
         } else {
           console.log("No such room!");
         }
@@ -130,26 +148,72 @@ function RoomPage() {
     }
   }, []);
 
-  const [movieList, setMovieList] = useState(null);
-  useEffect(() => {
-    const getMovies = async () => {
-      const movies = await getMovieList();
-      setMovieList(movies || []);
-    };
+  const getMovies = async () => {
+    const movies = await getMovieList();
+    setMovieList(movies || []);
+  };
 
+  useEffect(() => {
     getMovies();
   }, []);
 
-  const handleMovieSelection = (movieURL) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to select this movie?"
-    );
+  const handleMovieSelection = (movieURL, caption) => {
+    const confirmed = window.confirm(caption);
 
     if (confirmed) {
       updateRoomMovieStatus(roomID, movieURL);
+
+      const foundMovie = movieList.find((movie) => movie.movieURL === movieURL);
+
+      updateUserMovieHistory(currentUser, foundMovie.title);
       handleModalClose();
     }
     //setselectedMovieURL(movieURL);
+  };
+
+  const handleFormInput = async (title) => {
+    const result = await addVotes(roomID, title);
+    setButtonsDisabled(true);
+    setVotedMovie(title);
+    console.log(title);
+  };
+
+  const handleTimerEnd = async () => {
+    setShowVoteModal(false);
+    try {
+      const result = await countVotes(roomID);
+      console.log(result.status);
+      if (result.status) {
+        console.log(result.movies.length);
+        if (result.movies.length > 1) {
+          if (isRoomCreator) {
+            const confirmed = window.confirm(
+              "More than one movie recieved the most amount of votes, would like to start the vote again? if Yes click 'OK', if you would like to choose one of those movies click 'Cancel'"
+            );
+            if (confirmed) {
+              handleVoteModalClose();
+              handleMovieVoteStart();
+            } else {
+              setMovieList(result.movies);
+              openMovieSelectionForm(true);
+              handleVoteModalClose();
+            }
+          }
+        } else {
+          console.log(result.movies[0].movieURL);
+          if (isRoomCreator) {
+            handleMovieSelection(
+              result.movies[0].movieURL,
+              result.movies[0].title +
+                " was selected, would you like to play it?"
+            );
+          }
+          handleVoteModalClose();
+        }
+      }
+    } catch {
+      console.error("Error handling timer end: ");
+    }
   };
 
   const handlePlay = async () => {
@@ -170,12 +234,42 @@ function RoomPage() {
     }
   };
 
-  const handleMovieClose = () => {
-    closeMovie(roomID);
-    setselectedMovieURL("");
+  const handleMovieVoteStart = async () => {
+    setButtonsDisabled(false);
+    const result = await getMovies();
+    setShowVoteModal(true);
+    try {
+      const result = await createVote(roomID);
+      if (result.status) {
+        await updateRoomVoteStatus(roomID, true);
+      } else {
+        console.error("Failed to create vote:", result.error);
+      }
+    } catch (error) {
+      console.error("Error starting movie vote:", error);
+    }
   };
 
-  const openMovieSelectionForm = () => setShowModal(true);
+  const handleVoteModalClose = () => {
+    setButtonsDisabled(false);
+    setShowVoteModal(false);
+    if (isRoomCreator) {
+      updateRoomVoteStatus(roomID, false);
+    }
+  };
+
+  const openMovieSelectionForm = async (forVoting) => {
+    setButtonsDisabled(false);
+    if (!forVoting) {
+      try {
+        const result = await getMovies();
+      } catch {
+        console.log("Error fetching movies");
+      }
+    }
+
+    setShowModal(true);
+  };
   const handleModalClose = () => setShowModal(false);
 
   const handlePlayerReady = async (player) => {
@@ -184,6 +278,11 @@ function RoomPage() {
     player.on("dispose", () => {
       console.log("player will dispose");
     });
+  };
+
+  const handleMovieClose = () => {
+    closeMovie(roomID);
+    setselectedMovieURL("");
   };
 
   return (
@@ -205,7 +304,46 @@ function RoomPage() {
                   </Col>
                   <Col>
                     <Button
-                      onClick={() => handleMovieSelection(movie.movieURL)}
+                      onClick={() =>
+                        handleMovieSelection(
+                          movie.movieURL,
+                          "Are you sure you want to select this movie?"
+                        )
+                      }
+                    >
+                      Select Movie
+                    </Button>{" "}
+                    {/* Add your selectMovie function if needed */}
+                  </Col>
+                </Row>
+              ))}
+          </Form>
+        </Modal.Body>
+      </Modal>
+      <Modal
+        backdrop="static"
+        show={showVoteModal}
+        onHide={handleVoteModalClose}
+      >
+        <Modal.Header closeButton className="modal-header">
+          <Modal.Title>Vote for a movie</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="modal-box">
+          <Timer onTimerEnd={handleTimerEnd}></Timer>
+          <Form>
+            {movieList &&
+              movieList.map((movie, index) => (
+                <Row key={index} className="mb-3">
+                  {" "}
+                  {/* mb-3 adds margin bottom for spacing */}
+                  <Col>
+                    <Form.Label>{movie.title}</Form.Label>{" "}
+                    {/* Assuming each movie object has a 'title' property */}
+                  </Col>
+                  <Col>
+                    <Button
+                      onClick={() => handleFormInput(movie)}
+                      disabled={buttonsDisabled}
                     >
                       Select Movie
                     </Button>{" "}
@@ -264,10 +402,15 @@ function RoomPage() {
           </div>
           {isRoomCreator ? (
             <div className="sidebarButtons">
-              <button className="room-button" onClick={openMovieSelectionForm}>
+              <button
+                className="room-button"
+                onClick={() => openMovieSelectionForm(false)}
+              >
                 Choose a movie
               </button>
-              <button className="room-button">Vote for a movie</button>
+              <button className="room-button" onClick={handleMovieVoteStart}>
+                Vote for a movie
+              </button>
             </div>
           ) : (
             <></>

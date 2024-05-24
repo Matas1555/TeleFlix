@@ -25,6 +25,7 @@ export const createRoom = async (userName) => {
     await setDoc(roomRef, {
       roomCode: roomID,
       isMoviePlaying: false,
+      hasVotingStarted: false,
       isCreatorInTheRoom: true,
       movieURL: "",
       users: [userName],
@@ -34,6 +35,22 @@ export const createRoom = async (userName) => {
     return { status: true, roomId: roomID };
   } catch (e) {
     console.error("Error adding room: ", e);
+    return { status: false, error: e.message };
+  }
+};
+
+export const createVote = async (roomID) => {
+  try {
+    const historyRef = doc(db, "movieVoteForm", roomID);
+    await deleteDoc(historyRef);
+    await setDoc(historyRef, {
+      numberOfVotes: [],
+      timeVoteOpened: 0.01,
+      isVoteActive: true,
+      choosenMovies: [],
+    });
+    return { status: true };
+  } catch (e) {
     return { status: false, error: e.message };
   }
 };
@@ -57,7 +74,6 @@ export const getRoomCreator = async (roomID) => {
 export const addUserToRoom = async (roomID, userName) => {
   const roomRef = doc(db, "rooms", roomID);
   try {
-    // First, check if the room exists and the user isn't already in the room
     const roomDoc = await getDoc(roomRef);
     if (roomDoc.exists()) {
       const roomData = roomDoc.data();
@@ -71,6 +87,79 @@ export const addUserToRoom = async (roomID, userName) => {
       }
     } else {
       return { status: false, message: "Room does not exist" };
+    }
+  } catch (e) {
+    console.error("Error joining room: ", e);
+    return { status: false, message: e.message };
+  }
+};
+
+export const countVotes = async (roomID) => {
+  const voteRef = doc(db, "movieVoteForm", roomID);
+  try {
+    const voteDoc = await getDoc(voteRef);
+    if (voteDoc.exists()) {
+      const voteData = voteDoc.data();
+      //Check if anyone voted for a movie
+      if (voteData.numberOfVotes.length > 0) {
+        let max = Math.max(...voteData.numberOfVotes);
+        var count = 1;
+        var movies = [];
+        for (let i = 0; i < voteData.numberOfVotes.length; i++) {
+          if (voteData.numberOfVotes[i] === max) {
+            count++;
+            movies.push(voteData.choosenMovies[i]);
+          }
+        }
+        //Check if there are more than one movie with the highest amount of votes
+        if (count > 1) {
+          return { status: true, movies: movies };
+        } else {
+          return { status: true, movies: movies };
+        }
+      }
+    } else {
+      return { status: false, message: "voting form does not exist" };
+    }
+  } catch (e) {
+    console.error("Error finding form: ", e);
+    return { status: false, message: e.message };
+  }
+};
+
+export const addVotes = async (roomID, movie) => {
+  const voteRef = doc(db, "movieVoteForm", roomID);
+  try {
+    const voteDoc = await getDoc(voteRef);
+    if (voteDoc.exists()) {
+      const voteData = voteDoc.data();
+      const { choosenMovies = [], numberOfVotes = [] } = voteData;
+      const movieIndex = choosenMovies.findIndex(
+        (m) => m.title === movie.title
+      );
+      if (movieIndex === -1) {
+        //Movie not voted for
+        const updatedChoosenMovies = [...choosenMovies, movie];
+        const updatedNumberOfVotes = [...numberOfVotes, 1];
+        await updateDoc(voteRef, {
+          choosenMovies: updatedChoosenMovies,
+          numberOfVotes: updatedNumberOfVotes,
+        });
+        return {
+          status: true,
+          message: "Movie added and vote updated successfully",
+        };
+      } else {
+        //Movie already voted for
+        const updatedNumberOfVotes = [...numberOfVotes];
+        updatedNumberOfVotes[movieIndex] += 1;
+        await updateDoc(voteRef, {
+          numberOfVotes: updatedNumberOfVotes,
+        });
+        return { status: true, message: "Vote count updated successfully" };
+      }
+    } else {
+      return { status: false, message: "voting form does not exist" };
     }
   } catch (e) {
     console.error("Error joining room: ", e);
@@ -106,6 +195,43 @@ export const updateRoomMovieStatus = async (roomID, movie) => {
   } catch (e) {
     console.error("error updating movie status: ", e);
     return { status: false, message: e.message };
+  }
+};
+
+export const updateRoomVoteStatus = async (roomID, voteStatus) => {
+  const roomRef = doc(db, "rooms", roomID);
+  try {
+    // First, check if the room exists and the user isn't already in the room
+    const roomDoc = await getDoc(roomRef);
+    if (roomDoc.exists()) {
+      const roomData = roomDoc.data();
+      if (voteStatus != null) {
+        await updateDoc(roomRef, {
+          hasVotingStarted: voteStatus,
+        });
+        return { status: true, message: "Voting status updates successfully" };
+      } else {
+        return { status: false, message: "Error creating vote" };
+      }
+    } else {
+      return { status: false, message: "Room does not exist" };
+    }
+  } catch (e) {
+    console.error("error updating voting status: ", e);
+    return { status: false, message: e.message };
+  }
+};
+
+export const updateUserMovieHistory = async (userName, movie) => {
+  try {
+    const movieHistoryRef = await addDoc(collection(db, "moviehistory"), {
+      Movie: movie,
+      Time: Date.now(),
+      User: userName,
+    });
+    return { status: true };
+  } catch (e) {
+    return { status: false, error: e.message };
   }
 };
 
