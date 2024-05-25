@@ -113,9 +113,9 @@ export const countVotes = async (roomID) => {
         }
         //Check if there are more than one movie with the highest amount of votes
         if (count > 1) {
-          return { status: true, movies: movies };
+          return { status: true, movies: movies, moreThanOne: true };
         } else {
-          return { status: true, movies: movies };
+          return { status: true, movies: movies, moreThanOne: false };
         }
       }
     } else {

@@ -199,7 +199,7 @@ function RoomPage() {
               handleVoteModalClose();
             }
           }
-        } else {
+        } else if (result.movies.length === 1) {
           console.log(result.movies[0].movieURL);
           if (isRoomCreator) {
             handleMovieSelection(
@@ -208,6 +208,9 @@ function RoomPage() {
                 " was selected, would you like to play it?"
             );
           }
+          handleVoteModalClose();
+        } else {
+          alert("No one voted for a movie");
           handleVoteModalClose();
         }
       }
