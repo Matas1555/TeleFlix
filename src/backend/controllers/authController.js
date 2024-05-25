@@ -3,8 +3,6 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { addDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { getUserIP, getUserISPNationality } from "./recommendationController";
-const bcrypt = require('bcryptjs');
-
 const bcrypt = require("bcryptjs");
 
 const hashPassword = async (password) => {
