@@ -100,7 +100,7 @@ const getUserNationality = async (user) =>
         return -1
     }
 }
-const getUserIP = async () => {
+export const getUserIP = async () => {
     try {
         return fetch('https://api.ipify.org?format=json')
             .then(response => response.json())
@@ -116,7 +116,7 @@ const getUserIP = async () => {
         return -1;
     }
 }
-const getUserISPNationality = async (ip) => {
+export const getUserISPNationality = async (ip) => {
     try {
         const response = await fetch(`https://api.country.is/${ip}?json`);
         if (!response.ok) {
@@ -126,7 +126,7 @@ const getUserISPNationality = async (ip) => {
         return data.country;
     } catch (error) {
         console.error('Error fetching IP information:', error);
-        return null;
+        return -1;
     }
 }
 
@@ -256,7 +256,7 @@ export const getRecommendations = async (user) => {
         return [];
     }
 }
-export const getAllMovieList = async () => {
+const getAllMovieList = async () => {
     try {
         const moviesSnapshot = await getDocs(collection(db, "movies"));
         const movies = [];
@@ -269,7 +269,7 @@ export const getAllMovieList = async () => {
         return [];
     }
 };
-export const getMovieHistoryEntries = async () => {
+const getMovieHistoryEntries = async () => {
     try {
         const historySnapshot = await getDocs(collection(db, "moviehistory"));
         const history = [];
@@ -282,7 +282,7 @@ export const getMovieHistoryEntries = async () => {
         return [];
     }
 };
-export const getUsers = async () => {
+const getUsers = async () => {
     try {
         const userSnapshot = await getDocs(collection(db, "users"));
         const users = [];
