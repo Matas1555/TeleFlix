@@ -64,7 +64,9 @@ const NavBar = () => {
           <Nav>
             {currentUser ? (
               // If a user is logged in, display their username
-              <Nav.Link className="navbar-text">{currentUser}</Nav.Link>
+              <>
+                <Nav.Link className="navbar-text" href="/shop">Shop</Nav.Link><Nav.Link className="navbar-text">{currentUser}</Nav.Link></>
+              
             ) : (
               // If no user is logged in, display login and register links
               <>

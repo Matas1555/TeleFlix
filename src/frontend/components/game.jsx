@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { Modal } from 'react-bootstrap'; // Assuming you're using Bootstrap for modals
-import Game from './../../backend/controllers/game'; // Import your Game component
+import { Modal } from 'react-bootstrap';
+import GameController from '../../backend/controllers/gameController'; 
 
-const GameModal = ({ show, handleClose }) => {
+const GameModal = ({ show, handleClose, userEmail }) => {
   const [gameSize, setGameSize] = useState({ width: 600, height: 400 });
-
-
 
   return (
     <Modal show={show} onHide={handleClose} size="lg">
@@ -13,7 +11,7 @@ const GameModal = ({ show, handleClose }) => {
         <Modal.Title>Game Settings</Modal.Title>
       </Modal.Header>
       <Modal.Body className="modal-box">
-        <Game width={gameSize.width} height={gameSize.height} />
+        <GameController width={gameSize.width} height={gameSize.height} userEmail={userEmail} />
       </Modal.Body>
     </Modal>
   );
