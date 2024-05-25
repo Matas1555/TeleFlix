@@ -14,6 +14,7 @@ import MovieListModal from "./frontend/components/movieList";
 import MovieList from "./frontend/pages/MovieListWindow";
 import RoomPage from "./frontend/pages/RoomWindow";
 import Calendar from "./frontend/pages/CalendarWindow";
+import Shop from "./frontend/pages/ShopWindow";
 import MovieInformation from "./frontend/pages/MovieInformationWindow";
 import { AuthProvider } from "./authContext";
 
@@ -49,6 +50,7 @@ const App = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/shop" element={<Shop/>} />
           <Route
             path="/room"
             element={<RoomPage showMovieListModal={toggleMovieListModal} />}
