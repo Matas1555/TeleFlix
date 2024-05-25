@@ -20,6 +20,7 @@ import {
 import VideoJS from "../components/VideoJS";
 import { useAuth } from "../../authContext";
 import GameModal from './../components/game.jsx';
+import GameAlert from "../components/gameAlert.jsx";
 
 function RoomPage() {
   const [roomID, setRoomID] = useState("");
@@ -168,6 +169,7 @@ function RoomPage() {
 
   return (
     <>
+      <GameAlert />
       <Modal show={showModal} onHide={handleModalClose}>
         <Modal.Header closeButton className="modal-header">
           <Modal.Title>Choose a movie</Modal.Title>
@@ -194,7 +196,7 @@ function RoomPage() {
           </Form>
         </Modal.Body>
       </Modal>
-      <GameModal show={showGame} handleClose={handleGameClose} />
+      <GameModal show={showGame} handleClose={handleGameClose} userEmail={currentUser} />
       <div className="roomContainer">
         <div className="movieContainer">
           {isRoomCreator ? (
