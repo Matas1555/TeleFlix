@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { getShopItems } from '../../backend/controllers/shopController';
+import { getShopItems, ProcessBuying } from '../../backend/controllers/shopController';
 import './../css/shop.css'; 
-
+import { useAuth } from '../../authContext';
 const ShopWindow = () => {
   const [shopItems, setShopItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const { currentUser } = useAuth();
   useEffect(() => {
     const fetchShopItems = async () => {
       try {
@@ -31,7 +31,22 @@ const ShopWindow = () => {
   }
 
   const handleBuyClick = (item) => {
-    console.log("Buy clicked for item:", item);
+      const confirmed = window.confirm(`Are you sure you want to buy ${item.name} for ${item.price}?`);
+      if (confirmed) {
+          console.log("Buy clicked for item:", item);
+          ProcessBuying(item, currentUser)
+              .then(success => {
+                  if (success) {
+                      window.alert("Purchase successful!");
+                  } else {
+                      window.alert("Purchase failed.");
+                  }
+              })
+              .catch(error => {
+                  window.alert("An error occurred during the purchase.");
+                  console.error("Error during the purchase process:", error);
+              });
+      }
   };
 
   return (

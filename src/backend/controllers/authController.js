@@ -2,6 +2,8 @@ import { auth, db } from "./firebase-config";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { addDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { getUserIP, getUserISPNationality } from "./recommendationController";
+const bcrypt = require('bcryptjs');
 
 const bcrypt = require("bcryptjs");
 
@@ -74,7 +76,16 @@ export const registerUser = async (email, username, password) => {
       const errorMessage = error.message;
       console.error("Error in user registration:", errorCode, errorMessage);
     });
-
+    let nationality = -1;
+    try {
+        const userIP = await getUserIP();
+        nationality = await getUserISPNationality(userIP);
+    } catch (e) {
+        console.error("Error getting nationality: ", e)
+    }
+    if (nationality === -1) {
+        nationality = "";
+    }
   try {
     const hashPass = await hashPassword(password);
     const docRef = await addDoc(collection(db, "users"), {
@@ -83,6 +94,7 @@ export const registerUser = async (email, username, password) => {
       password: hashPass, //password
       points: 0,
       isAdmin: false,
+      nationality: nationality,
     });
 
     console.log("Document written with ID: ", docRef.id);
