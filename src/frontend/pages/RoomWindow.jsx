@@ -19,11 +19,13 @@ import {
 } from "../../backend/controllers/roomController";
 import VideoJS from "../components/VideoJS";
 import { useAuth } from "../../authContext";
+import GameModal from './../components/game.jsx';
 
 function RoomPage() {
   const [roomID, setRoomID] = useState("");
   const [users, setUsers] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showGame, setShowGame] = useState(false);
   const [selectedMovieURL, setselectedMovieURL] = useState("");
   const [isRoomCreator, setIsRoomCreator] = useState(false);
   const [isMoviePlaying, setIsMoviePlaying] = useState(false);
@@ -153,6 +155,9 @@ function RoomPage() {
   const handleModalShow = () => setShowModal(true);
   const handleModalClose = () => setShowModal(false);
 
+  const handleGameShow = () => setShowGame(true);
+  const handleGameClose = () => setShowGame(false);
+
   const handlePlayerReady = async (player) => {
     playerRef.current = player;
 
@@ -189,6 +194,7 @@ function RoomPage() {
           </Form>
         </Modal.Body>
       </Modal>
+      <GameModal show={showGame} handleClose={handleGameClose} />
       <div className="roomContainer">
         <div className="movieContainer">
           {isRoomCreator ? (
@@ -223,7 +229,7 @@ function RoomPage() {
             <h1 className="roomCode">{roomID}</h1>
           </div>
           <div className="sidebarButtons">
-            <button className="room-button">Start game</button>
+            <button className="room-button"onClick={handleGameShow}>Start game</button>
             <button className="room-button">Predict what happens</button>
           </div>
           {isRoomCreator ? (

@@ -1,3 +1,13 @@
-body {
-  background-color: #14181C; /* Replace with your desired background color */
+
+
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #14181C;
+}
+
+canvas {
+  border: 1px solid white;
 }
