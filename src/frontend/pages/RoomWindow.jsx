@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "../css/roomPage.css";
+import "../css/comments.css";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../../backend/controllers/firebase-config.js";
 import { onAuthStateChanged } from "firebase/auth";
@@ -24,15 +25,28 @@ import {
   createVote,
   addVotes,
   countVotes,
+  addEvent,
+  updateRoomEventPredictionStatus,
+  getPrediction,
+  addUserPrediction,
+  checkUserAnswers,
 } from "../../backend/controllers/roomController";
 import VideoJS from "../components/VideoJS";
 import { useAuth } from "../../authContext";
+import GameModal from "./../components/game.jsx";
 
 function RoomPage() {
-  const [roomID, setRoomID] = useState("");
-  const [users, setUsers] = useState([]);
+  //MODALS
   const [showModal, setShowModal] = useState(false);
   const [showVoteModal, setShowVoteModal] = useState(false);
+  const [isEventCreationVisable, setShowCreationForm] = useState(false);
+  const [hasPredictionStarted, setShowPredictionForm] = useState(false);
+  const [showGame, setShowGame] = useState(false);
+
+  //VARIABLES
+  const [prediction, setPrediction] = useState("");
+  const [users, setUsers] = useState([]);
+  const [roomID, setRoomID] = useState("");
   const [selectedMovieURL, setselectedMovieURL] = useState("");
   const [isRoomCreator, setIsRoomCreator] = useState(false);
   const [isMoviePlaying, setIsMoviePlaying] = useState(false);
@@ -71,6 +85,15 @@ function RoomPage() {
         console.log("new user joined by link");
       }
       //setUsers(roomData.users || []);
+    };
+
+    const setEventPrediction = async (roomID) => {
+      const result = await getPrediction(roomID);
+      if (result.status) {
+        setPrediction(result.prediction);
+      } else {
+        setPrediction("");
+      }
     };
 
     if (id) {
@@ -138,6 +161,13 @@ function RoomPage() {
             setButtonsDisabled(false);
             setShowVoteModal(false);
           }
+
+          if (roomData.isEventPredictionActive) {
+            setEventPrediction(id);
+            setShowPredictionForm(true);
+          } else {
+            setShowPredictionForm(false);
+          }
         } else {
           console.log("No such room!");
         }
@@ -184,11 +214,10 @@ function RoomPage() {
       const result = await countVotes(roomID);
       console.log(result.status);
       if (result.status) {
-        console.log(result.movies.length);
         if (result.movies.length > 1) {
           if (isRoomCreator) {
             const confirmed = window.confirm(
-              "More than one movie recieved the most amount of votes, would like to start the vote again? if Yes click 'OK', if you would like to choose one of those movies click 'Cancel'"
+              "More than one movie has the most amount of votes, would like to start the vote again? if Yes click 'OK', if you would like to choose one of those movies click 'Cancel'"
             );
             if (confirmed) {
               handleVoteModalClose();
@@ -275,6 +304,9 @@ function RoomPage() {
   };
   const handleModalClose = () => setShowModal(false);
 
+  const handleGameShow = () => setShowGame(true);
+  const handleGameClose = () => setShowGame(false);
+
   const handlePlayerReady = async (player) => {
     playerRef.current = player;
 
@@ -288,8 +320,55 @@ function RoomPage() {
     setselectedMovieURL("");
   };
 
+  const handleMovieEventStart = async () => {
+    setShowCreationForm(true);
+  };
+
+  const handleEventCreation = () => {
+    const prediction = document.getElementById("eventPrediction").value;
+    const result = addEvent(roomID, prediction);
+    if (result.status) {
+      alert("You left the field empty");
+    } else {
+      updateRoomEventPredictionStatus(roomID, true);
+      setShowCreationForm(false);
+      setShowPredictionForm(true);
+    }
+  };
+
+  const handleCreationFormClose = () => {
+    setShowCreationForm(false);
+  };
+
+  const handlePredictionFormClose = () => {
+    if (isRoomCreator) {
+      updateRoomEventPredictionStatus(roomID, false);
+    }
+    setShowPredictionForm(false);
+  };
+
+  const handleUserPrediction = (response) => {
+    addUserPrediction(roomID, currentUser, response);
+    setShowPredictionForm(false);
+  };
+
+  const handleVoteEnd = async (response) => {
+    updateRoomEventPredictionStatus(roomID, false);
+    const result = await checkUserAnswers(roomID, response);
+    if (!isRoomCreator) {
+      if (result.correctUsers.includes(currentUser)) {
+        alert(
+          "You have made the right descision, your account recieved 100 points:)"
+        );
+      } else {
+        alert("You are a failure");
+      }
+    }
+  };
+
   return (
     <>
+      {/* ------------------------------------------- MOVIE SELECTION FORM --------------------------------- */}
       <Modal show={showModal} onHide={handleModalClose}>
         <Modal.Header closeButton className="modal-header">
           <Modal.Title>Choose a movie</Modal.Title>
@@ -323,6 +402,8 @@ function RoomPage() {
           </Form>
         </Modal.Body>
       </Modal>
+      {/* --------------------------------------------------------------------------------------------- */}
+      {/* ------------------------------------------- MOVIE VOTE FORM --------------------------------- */}
       <Modal
         backdrop="static"
         show={showVoteModal}
@@ -357,9 +438,11 @@ function RoomPage() {
           </Form>
         </Modal.Body>
       </Modal>
+      {/* --------------------------------------------------------------------------------------------- */}
+      <GameModal show={showGame} handleClose={handleGameClose} />
       <div className="roomContainer">
         <div className="movieContainer">
-          {selectedMovieURL ? (
+          {selectedMovieURL && isRoomCreator ? (
             <>
               <button onClick={handleMovieClose} className="movieCloseButton">
                 X
@@ -400,8 +483,12 @@ function RoomPage() {
             <h1 className="roomCode">{roomID}</h1>
           </div>
           <div className="sidebarButtons">
-            <button className="room-button">Start game</button>
-            <button className="room-button">Predict what happens</button>
+            <button className="room-button" onClick={handleGameShow}>
+              Start game
+            </button>
+            <button className="room-button" onClick={handleMovieEventStart}>
+              Predict what happens
+            </button>
           </div>
           {isRoomCreator ? (
             <div className="sidebarButtons">
@@ -433,6 +520,82 @@ function RoomPage() {
               <button className="room-button">Send</button>
             </div>
           </div>
+          {/* --------------------- EVENT CREATION WINDOW -------------------------------------*/}
+          {isEventCreationVisable && (
+            <div className="main_comment-window">
+              <button
+                onClick={handleCreationFormClose}
+                className="close-window-button"
+              >
+                <b>X</b>
+              </button>
+              <div className="user-comment-input">
+                <p className="eventText">
+                  What event do you think will happen in the movie?
+                </p>
+                <input
+                  id="eventPrediction"
+                  type="text"
+                  className="input-comment-field"
+                  name="eventPrediction"
+                />
+                <input
+                  type="submit"
+                  onClick={handleEventCreation}
+                  className="room-button"
+                  value="Submit"
+                />
+              </div>
+            </div>
+          )}
+          {/* --------------------- EVENT CREATION WINDOW -------------------------------------*/}
+          {/* --------------------- PREDICTION WINDOW -------------------------------------*/}
+          {hasPredictionStarted && (
+            <div className="main_comment-window">
+              <button
+                onClick={handlePredictionFormClose}
+                className="close-window-button"
+              >
+                <b>X</b>
+              </button>
+              <div className="user-comment-input">
+                {isRoomCreator ? (
+                  <>
+                    <p className="eventText">Did the event happen?</p>
+                    <input
+                      type="submit"
+                      onClick={() => handleVoteEnd(true)}
+                      className="room-button"
+                      value="Yes"
+                    />
+                    <input
+                      type="submit"
+                      onClick={() => handleVoteEnd(false)}
+                      className="room-button"
+                      value="No"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <p className="roomText">{prediction}</p>
+                    <input
+                      type="submit"
+                      onClick={() => handleUserPrediction(true)}
+                      className="room-button"
+                      value="Yes"
+                    />
+                    <input
+                      type="submit"
+                      onClick={() => handleUserPrediction(false)}
+                      className="room-button"
+                      value="No"
+                    />
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+          {/* --------------------- PREDICTION WINDOW -------------------------------------*/}
         </div>
       </div>
     </>

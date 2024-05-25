@@ -34,6 +34,7 @@ const App = () => {
     <AuthProvider>
       <Router>
         <Navbar />
+        
         <AddMovie showModal={ShowMovieAddForm} onCloseModal={toggleModal} />
         <MovieListModal
           showMovieListModal={ShowMovieListForm}

@@ -22,7 +22,7 @@ export default function Timer({ onTimerEnd }) {
   }, [timer]);
 
   return (
-    <div className="App">
+    <div>
       <div>Time left : {timer} </div>
     </div>
   );

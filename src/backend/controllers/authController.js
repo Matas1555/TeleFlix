@@ -3,7 +3,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { addDoc, collection, query, where, getDocs } from "firebase/firestore";
 
-const bcrypt = require('bcryptjs');
+const bcrypt = require("bcryptjs");
 
 const hashPassword = async (password) => {
   try {
@@ -11,28 +11,28 @@ const hashPassword = async (password) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     return hashedPassword;
   } catch (error) {
-    console.error('Error hashing password:', error);
+    console.error("Error hashing password:", error);
     throw error;
   }
 };
-
 
 const comparePassword = async (password, hashedPassword) => {
   try {
     const isMatch = await bcrypt.compare(password, hashedPassword);
     return isMatch;
   } catch (error) {
-    console.error('Error comparing passwords:', error);
+    console.error("Error comparing passwords:", error);
     throw error;
   }
 };
 
 export const loginUser = async (email, password, login) => {
-  
   try {
     // Retrieve user document from Firestore based on email
     const usersRef = collection(db, "users");
-    const querySnapshot = await getDocs(query(usersRef, where("email", "==", email)));
+    const querySnapshot = await getDocs(
+      query(usersRef, where("email", "==", email))
+    );
     if (querySnapshot.empty) {
       console.error("No user found with this email");
       return { status: false, error: "Invalid email or password" };
@@ -76,7 +76,7 @@ export const registerUser = async (email, username, password) => {
     });
 
   try {
-    const hashPass = await hashPassword(password)
+    const hashPass = await hashPassword(password);
     const docRef = await addDoc(collection(db, "users"), {
       email: email,
       username: username,
@@ -92,5 +92,3 @@ export const registerUser = async (email, username, password) => {
 
   return { status: true };
 };
-
-

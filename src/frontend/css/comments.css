@@ -1,0 +1,161 @@
+.main_comment-window {
+  /* display: flex; */
+  /* flex-direction: column; */
+  position: fixed;
+  right: 30px;
+  bottom: 0px;
+  width: 20vw;
+  height: 40vh;
+  z-index: 9999;
+  padding-bottom: 50px;
+  top: auto;
+  background-color: #14181c;
+  border: 2px solid #fa7272;
+  border-bottom: none;
+  border-radius: 20px 20px 0px 0px;
+}
+
+.scrolling-comments {
+  flex-grow: 1;
+  max-height: 90%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.user-comment-input {
+  display: flex;
+  margin: 3vh;
+  margin-top: 1vh;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.close-button {
+  display: flex;
+  right: 0px;
+  margin-left: 10vh;
+}
+
+.submit-comment-button {
+  --bg-color: #f8f9fa;
+  --main-color: #343a40;
+  width: 15vh;
+  height: 5vh;
+  /* border-radius: 30%; */
+  border: 2px solid var(--main-color);
+  background-color: var(--bg-color);
+  box-shadow: 4px 4px var(--main-color);
+  font-size: 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s;
+  cursor: pointer;
+  padding-bottom: 3px;
+  margin-bottom: 3px;
+  border-radius: 10px;
+}
+
+.submit-comment-button:hover {
+  background-color: #dee2e6;
+}
+
+.submit-comment-button:active {
+  box-shadow: 0px 0px var(--main-color);
+  transform: translate(3px, 3px);
+}
+
+.input-comment-field {
+  width: 100%;
+  font-size: 25px;
+  margin: auto;
+  padding-left: 10px;
+  border: 2px solid black;
+  font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
+}
+
+.eventText {
+  color: white;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.close-window-button {
+  margin: 5px;
+  text-decoration: solid;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  background-color: #14181c;
+  color: #fa7272;
+}
+
+.other-user-comments .comment-username {
+  font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
+  font-weight: 1000;
+  padding: 0;
+  margin: 0;
+  margin-top: 5px;
+}
+
+.other-user-comments .users-comment {
+  font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
+  padding: 0;
+  margin: 0;
+  margin-top: 5px;
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateY(400px);
+    animation-timing-function: linear;
+  }
+  60% {
+    transform: translateY(-30px);
+    animation-timing-function: linear;
+  }
+  80% {
+    transform: translateY(10px);
+    animation-timing-function: linear;
+  }
+  100% {
+    transform: translateY(0px);
+    animation-timing-function: linear;
+  }
+}
+
+@keyframes slideDown {
+  0% {
+    transform: translateY(-400px);
+    animation-timing-function: linear;
+  }
+  60% {
+    transform: translateY(30px);
+    animation-timing-function: linear;
+  }
+  80% {
+    transform: translateY(-10px);
+    animation-timing-function: linear;
+  }
+  100% {
+    transform: translateY(0px);
+    animation-timing-function: linear;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.main_comment-window {
+  animation: fadeIn 0.7s, slideIn 0.5s linear;
+}
+
+.main_comment-window.closed {
+  animation: slideDown 0.5s linear;
+}

@@ -16,6 +16,7 @@ import {
   deleteDoc,
   getDoc,
   arrayUnion,
+  writeBatch,
 } from "firebase/firestore";
 
 export const createRoom = async (userName) => {
@@ -26,6 +27,7 @@ export const createRoom = async (userName) => {
       roomCode: roomID,
       isMoviePlaying: false,
       hasVotingStarted: false,
+      isEventPredictionActive: false,
       isCreatorInTheRoom: true,
       movieURL: "",
       users: [userName],
@@ -55,6 +57,45 @@ export const createVote = async (roomID) => {
   }
 };
 
+export const addEvent = async (roomID, predictionString) => {
+  const result = validateFormInformation(predictionString);
+  if (result) {
+    try {
+      const eventRef = doc(db, "movieEventForm", roomID);
+      await deleteDoc(eventRef);
+      await setDoc(eventRef, {
+        prediction: predictionString,
+        isPredictionActive: true,
+      });
+      return { status: true };
+    } catch (e) {
+      return { status: false, message: e.message };
+    }
+  } else {
+    return { status: false, message: "prediction was not written" };
+  }
+};
+
+export const addUserPrediction = async (roomID, username, predictionString) => {
+  try {
+    const eventRef = doc(db, "Response", roomID + "_" + username);
+    await deleteDoc(eventRef);
+    await setDoc(eventRef, {
+      user: username,
+      response: predictionString,
+    });
+    return { status: true };
+  } catch (e) {
+    return { status: false, message: e.message };
+  }
+};
+
+export const validateFormInformation = (sentence) => {
+  if (sentence === "") {
+    return false;
+  } else return true;
+};
+
 export const getRoomCreator = async (roomID) => {
   const roomRef = doc(db, "rooms", roomID);
   try {
@@ -62,6 +103,23 @@ export const getRoomCreator = async (roomID) => {
     if (roomDoc.exists()) {
       const roomData = roomDoc.data();
       return { status: true, roomCreator: roomData.users[0] };
+    } else {
+      return { status: false, message: "Room does not exist" };
+    }
+  } catch (e) {
+    console.error("Error getting room creator: ", e);
+    return { status: false, message: e.message };
+  }
+};
+
+export const getPrediction = async (roomID) => {
+  console.log(roomID);
+  const roomRef = doc(db, "movieEventForm", roomID);
+  try {
+    const roomDoc = await getDoc(roomRef);
+    if (roomDoc.exists()) {
+      const roomData = roomDoc.data();
+      return { status: true, prediction: roomData.prediction };
     } else {
       return { status: false, message: "Room does not exist" };
     }
@@ -167,6 +225,61 @@ export const addVotes = async (roomID, movie) => {
   }
 };
 
+export const checkUserAnswers = async (roomID, response) => {
+  var correctUsers = [];
+  try {
+    const documentsArray = [];
+    const querySnapshot = await getDocs(collection(db, "Response"));
+
+    querySnapshot.forEach((doc) => {
+      const docID = doc.id;
+      const [docRoomID, username] = docID.split("_");
+
+      if (docRoomID === roomID) {
+        documentsArray.push(doc.data());
+      }
+    });
+
+    for (var doc of documentsArray) {
+      if (doc.response === response) {
+        correctUsers.push(doc.user);
+      }
+    }
+
+    const results = await checkCorrectAnswers(correctUsers);
+
+    return { status: true, correctUsers: correctUsers };
+  } catch (e) {
+    console.error("Error getting room creator: ", e);
+    return { status: false, correctUsers: correctUsers };
+  }
+};
+
+export const checkCorrectAnswers = async (users) => {
+  try {
+    console.log(users);
+    const querySnapshot = await getDocs(collection(db, "users"));
+
+    for (let userDoc of querySnapshot.docs) {
+      const userData = userDoc.data();
+      if (users.includes(userData.email)) {
+        const userRef = doc(db, "users", userDoc.id);
+        const newPoints = (userData.points || 0) + 100;
+        console.log(
+          `Updating points for user ${userData.user} to ${newPoints}`
+        );
+        await updateDoc(userRef, { points: newPoints });
+      }
+    }
+
+    console.log("Points updated successfully");
+    return { status: true, correctUsers: users };
+  } catch (e) {
+    console.error("Error updating user points: ", e);
+    return { status: false, correctUsers: users };
+  }
+};
+
 export const updateRoomMovieStatus = async (roomID, movie) => {
   const roomRef = doc(db, "rooms", roomID);
   try {
@@ -218,6 +331,36 @@ export const updateRoomVoteStatus = async (roomID, voteStatus) => {
     }
   } catch (e) {
     console.error("error updating voting status: ", e);
+    return { status: false, message: e.message };
+  }
+};
+
+export const updateRoomEventPredictionStatus = async (
+  roomID,
+  predictionStatus
+) => {
+  const roomRef = doc(db, "rooms", roomID);
+  try {
+    // First, check if the room exists and the user isn't already in the room
+    const roomDoc = await getDoc(roomRef);
+    if (roomDoc.exists()) {
+      const roomData = roomDoc.data();
+      if (predictionStatus != null) {
+        await updateDoc(roomRef, {
+          isEventPredictionActive: predictionStatus,
+        });
+        return {
+          status: true,
+          message: "Prediction status updated successfully",
+        };
+      } else {
+        return { status: false, message: "Error creating prediction" };
+      }
+    } else {
+      return { status: false, message: "Room does not exist" };
+    }
+  } catch (e) {
+    console.error("error updating prediction status: ", e);
     return { status: false, message: e.message };
   }
 };
