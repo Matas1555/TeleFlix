@@ -1,7 +1,7 @@
 import { db } from "./firebase-config";
 import { collection, query, where, getDocs, addDoc, deleteDoc, updateDoc, doc } from "firebase/firestore";
 
-export const getUserEvents = async (userId) => {
+export const getAllEvents = async (userId) => {
   try {
     const eventsQuery = query(
       collection(db, "events"),
@@ -26,9 +26,10 @@ export const getMovies = async () => {
     moviesSnapshot.forEach((doc) => {
       movies.push({ id: doc.id, ...doc.data() });
     });
+    console.log("Fetched movies from Firestore:", movies); // Debug log
     return movies;
   } catch (error) {
-    console.error("Error getting movies:", error);
+    console.error("Error getting movies:", error.message);
     return [];
   }
 };
