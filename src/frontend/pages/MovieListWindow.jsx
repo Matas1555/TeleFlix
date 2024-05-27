@@ -4,6 +4,7 @@ import {
   getMovieList,
   deleteMovie,
     updateMovie,
+    ApplyFilter,
     getUser,
 } from "../../backend/controllers/movieController";
 import { useAuth } from '../../authContext';
@@ -13,6 +14,19 @@ function MovieList({ ShowMovieAddForm }) {
     const [editedMovie, setEditedMovie] = useState(null);
     const { currentUser } = useAuth()
     const [admin, setAdmin] = useState(null);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const selectedFilter = (filter) => {
+        ApplyFilter(filter)
+            .then((loadMovies) => {
+                setShowDropdown(false);
+                if (loadMovies) {
+                    setMovies(loadMovies);
+                }
+            })
+            .catch((error) => {
+                console.error("Error applying filter:", error);
+            });
+    };
   useEffect(() => {
       const fetchMovies = async () => {
           const loadedMovies = await getMovieList(currentUser);
@@ -56,8 +70,21 @@ function MovieList({ ShowMovieAddForm }) {
                       </button>
                   </>
               ) : null}
-        <button className="navbar-button">Filter</button>
-      </div>
+              <div class="navbar">
+              <button
+                  className="navbar-button"
+                  onClick={() => setShowDropdown(!showDropdown)}
+              >
+                  Filter
+              </button>
+              {showDropdown && (
+                  <div className="dropdown-menu">
+                          <button onClick={() => selectedFilter(1)}>Popular</button>
+                          <button onClick={() => selectedFilter(2)}>Least popular</button>
+                  </div>
+                  )}
+              </div>
+          </div>
       <div className="main-container">
         <div className="movie-list-container">
           <div className="movie-list">

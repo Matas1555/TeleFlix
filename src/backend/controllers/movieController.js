@@ -50,6 +50,55 @@ export const addMovie = async (movieData, file) => {
     return { status: false, error: e.message };
   }
 };
+export const ApplyFilter = async (filter) => {
+    try {
+        const moviesSnapshot = await getDocs(collection(db, "movies"));
+        const movies = [];
+        moviesSnapshot.forEach((doc) => {
+            movies.push({ id: doc.id, ...doc.data() });
+        });
+        const historySnapshot = await getDocs(collection(db, "moviehistory"));
+        let history = [];
+        historySnapshot.forEach((doc) => {
+            history.push({ id: doc.id, ...doc.data() });
+        });
+        history = history.map(entry => entry.Movie);
+        const movieCounts = history.reduce((acc, movie) => {
+            if (acc[movie]) {
+                acc[movie]++;
+            } else {
+                acc[movie] = 1;
+            }
+            return acc;
+        }, {});
+        let list = Object.entries(movieCounts).map(([movie, count]) => ({
+            movie,
+            count
+        }));
+        if (filter === 1) {
+            list.sort((a, b) => b.count - a.count);
+            list = list.map(entry => entry.movie);
+            const filteredList = list.flatMap(title => {
+                const movie = movies.find(movie => movie.title === title);
+                return movie ? [movie] : [];
+            }).concat(movies.filter(movie => !list.includes(movie.title)));
+            return filteredList;
+        }
+        if (filter === 2) {
+            list.sort((a, b) => a.count - b.count);
+            list = list.map(entry => entry.movie);
+            const filteredList = list.flatMap(title => {
+                const movie = movies.find(movie => movie.title === title);
+                return movie ? [movie] : [];
+            }).concat(movies.filter(movie => !list.includes(movie.title)));
+            return filteredList;
+        }
+        return null;
+    } catch (error) {
+        console.error("Error getting filtered movies:", error);
+        return null;
+    }
+}
 
 export const postComment = async (movieId, commentText, user) => {
   try {
