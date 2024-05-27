@@ -2,6 +2,7 @@
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
+  margin-top: 2vh;
 }
 
 .header {
@@ -16,7 +17,8 @@
   border-collapse: collapse;
 }
 
-.calendar-grid th, .calendar-grid td {
+.calendar-grid th,
+.calendar-grid td {
   border: 1px solid #ccc;
   width: 14.28%; /* 100% / 7 days */
   text-align: center;
@@ -49,38 +51,58 @@
 }
 
 /* Modal styles */
-.modal {
+.modal_calendar {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
+  border: 1px solid black;
   display: flex;
   color: red;
   align-items: center;
   justify-content: center;
 }
 
-.modal-content {
+.modal-content_calendar {
   background: white;
   padding: 20px;
   border-radius: 5px;
   color: red;
-  width: 300px;
+  width: 500px;
   text-align: center;
 }
 
-.modal-content select {
+.modal-content_calendar select {
   width: 100%;
   padding: 5px;
   color: red;
   margin-bottom: 20px;
 }
 
-.modal-content button {
-  margin: 5px;
+.modal-content_calendar button {
+  background-color: white;
+  color: black;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid black;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+.modal-content_calendar button:hover {
+  border-color: #fa7272;
+  color: #fa7272;
+  fill: #fa7272;
+  background-color: white;
 }
 .movie-name {
   color: black;
+}
+
+.calendar_Date {
+  color: white;
 }

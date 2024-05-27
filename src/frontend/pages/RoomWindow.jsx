@@ -370,33 +370,40 @@ function RoomPage() {
   return (
     <>
       <GameAlert />
+      {/* ------------------------------------------- MOVIE CHOOSING FORM --------------------------------- */}
       <Modal show={showModal} onHide={handleModalClose}>
         <Modal.Header closeButton className="modal-header">
           <Modal.Title>Choose a movie</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="modal-box">
+        <Modal.Body
+          className="modal-box"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
           <Form>
             {movieList &&
               movieList.map((movie, index) => (
-                <Row key={index} className="mb-3">
+                <Row key={index} className="mb-3 justify-content-center">
                   {" "}
                   {/* mb-3 adds margin bottom for spacing */}
                   <Col>
-                    <Form.Label>{movie.title}</Form.Label>{" "}
-                    {/* Assuming each movie object has a 'title' property */}
-                  </Col>
-                  <Col>
                     <Button
+                      variant="outline-light"
                       onClick={() =>
                         handleMovieSelection(
                           movie.movieURL,
                           "Are you sure you want to select this movie?"
                         )
                       }
+                      style={{
+                        width: "100%",
+                        "max-width": "center",
+                      }}
                     >
-                      Select Movie
+                      {movie.title}
                     </Button>{" "}
-                    {/* Add your selectMovie function if needed */}
                   </Col>
                 </Row>
               ))}
@@ -410,35 +417,46 @@ function RoomPage() {
         show={showVoteModal}
         onHide={handleVoteModalClose}
       >
-        <Modal.Header closeButton className="modal-header">
+        <Modal.Header closeButton className="modal-header custom-close-button">
           <Modal.Title>Vote for a movie</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="modal-box">
-          <Timer onTimerEnd={handleTimerEnd}></Timer>
+        <Modal.Body
+          className="modal-box"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
           <Form>
+            <Row>
+              <Timer onTimerEnd={handleTimerEnd}></Timer>
+            </Row>
             {movieList &&
               movieList.map((movie, index) => (
-                <Row key={index} className="mb-3">
+                <Row
+                  key={index}
+                  className="mb-3 justify-content-center align-items-center"
+                >
                   {" "}
-                  {/* mb-3 adds margin bottom for spacing */}
-                  <Col>
-                    <Form.Label>{movie.title}</Form.Label>{" "}
-                    {/* Assuming each movie object has a 'title' property */}
-                  </Col>
                   <Col>
                     <Button
+                      variant="outline-light"
                       onClick={() => handleFormInput(movie)}
                       disabled={buttonsDisabled}
+                      style={{
+                        width: "100%",
+                        "max-width": "center",
+                      }}
                     >
-                      Select Movie
+                      {movie.title}
                     </Button>{" "}
-                    {/* Add your selectMovie function if needed */}
                   </Col>
                 </Row>
               ))}
           </Form>
         </Modal.Body>
       </Modal>
+      {/* --------------------------------------------------------------------------------------------- */}
       <GameModal
         show={showGame}
         handleClose={handleGameClose}
@@ -490,9 +508,13 @@ function RoomPage() {
             <button className="room-button" onClick={handleGameShow}>
               Start game
             </button>
-            <button className="room-button" onClick={handleMovieEventStart}>
-              Predict what happens
-            </button>
+            {isRoomCreator ? (
+              <button className="room-button" onClick={handleMovieEventStart}>
+                Predict what happens
+              </button>
+            ) : (
+              <></>
+            )}
           </div>
           {isRoomCreator ? (
             <div className="sidebarButtons">

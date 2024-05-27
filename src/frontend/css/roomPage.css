@@ -48,6 +48,11 @@
   margin-bottom: 20px;
 }
 
+.sidebarButtons button {
+  flex: 1; /* This makes all buttons take equal space */
+  max-width: 200px; /* Optional: to limit the maximum width */
+}
+
 .messages {
   display: flex;
   flex-direction: row;
@@ -143,4 +148,20 @@
   justify-content: center;
   margin-bottom: 5px;
   margin-left: -2px;
+}
+
+.custom-close-button .btn-close {
+  color: white;
+}
+
+.room_custom_button {
+  background-color: white;
+  color: black;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid black;
+  border-radius: 3px;
+  box-sizing: border-box;
 }
