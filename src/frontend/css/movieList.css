@@ -89,3 +89,7 @@ th {
   background-color: #0f1113;
   border: 2px solid black;
 }
+
+.modal-content {
+  padding: 0px;
+}

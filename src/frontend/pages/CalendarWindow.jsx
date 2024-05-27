@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../authContext";
-import { getAllEvents, getMovies, addEvent, deleteEvent, updateEvent } from "../../backend/controllers/calendarController";
+import {
+  getAllEvents,
+  getMovies,
+  addEvent,
+  deleteEvent,
+  updateEvent,
+} from "../../backend/controllers/calendarController";
 import "../css/calendar.css";
 
 function Calendar() {
@@ -45,7 +51,7 @@ function Calendar() {
       console.error("Error fetching movies:", error);
     }
   };
-  
+
   // Define a movie cache object
   const movieCache = {};
 
@@ -58,7 +64,7 @@ function Calendar() {
         // Fetch movies only if not in cache
         const moviesList = await getMovies();
         if (moviesList) {
-          const movie = moviesList.find(movie => movie.id === movieId);
+          const movie = moviesList.find((movie) => movie.id === movieId);
           const movieTitle = movie ? movie.title : "Unknown";
           // Cache the movie
           movieCache[movieId] = movieTitle;
@@ -76,7 +82,11 @@ function Calendar() {
 
   const handleAddEvent = async (date, movieId) => {
     if (movieId) {
-      const event = { userId: currentUser, date: new Date(date).toISOString(), movieId };
+      const event = {
+        userId: currentUser,
+        date: new Date(date).toISOString(),
+        movieId,
+      };
       const newEvent = await addEvent(event);
       setUserEvents([...userEvents, newEvent]);
     }
@@ -85,16 +95,20 @@ function Calendar() {
   const handleEditEvent = async (event, movieId) => {
     if (movieId) {
       const updatedEvent = await updateEvent(event.id, { ...event, movieId });
-      setUserEvents(userEvents.map(evt => evt.id === event.id ? updatedEvent : evt));
+      setUserEvents(
+        userEvents.map((evt) => (evt.id === event.id ? updatedEvent : evt))
+      );
     }
   };
 
   const handleDeleteEvent = async (eventId) => {
-    const confirmed = window.confirm("Are you sure you want to delete this event?");
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this event?"
+    );
     if (confirmed) {
       const success = await deleteEvent(eventId);
       if (success) {
-        setUserEvents(userEvents.filter(event => event.id !== eventId));
+        setUserEvents(userEvents.filter((event) => event.id !== eventId));
       }
     }
   };
@@ -116,63 +130,67 @@ function Calendar() {
   };
 
   const selectDate = (selectedDay) => {
-  const year = selectedDay.getFullYear();
-  const month = selectedDay.getMonth();
-  const day = selectedDay.getDate(); // Extract the day from the Date object
-  const selectedDayISO = selectedDay.toISOString().split('T')[0];
+    const year = selectedDay.getFullYear();
+    const month = selectedDay.getMonth();
+    const day = selectedDay.getDate(); // Extract the day from the Date object
+    const selectedDayISO = selectedDay.toISOString().split("T")[0];
 
-  const eventsForDay = userEvents.find(event => {
-    if (typeof event.date === 'string') {
-      const eventDate = event.date.split('T')[0];
-      return eventDate === selectedDayISO;
+    const eventsForDay = userEvents.find((event) => {
+      if (typeof event.date === "string") {
+        const eventDate = event.date.split("T")[0];
+        return eventDate === selectedDayISO;
+      }
+      return false;
+    });
+
+    if (eventsForDay) {
+      openForm(selectedDayISO, eventsForDay.movieId);
+    } else {
+      openForm(selectedDayISO);
     }
-    return false;
-  });
-
-  if (eventsForDay) {
-    openForm(selectedDayISO, eventsForDay.movieId);
-  } else {
-    openForm(selectedDayISO);
-  }
-};
+  };
 
   const handleSaveEvent = () => {
-  if (eventDate && selectedMovie) {
-    const movie = movies.find(movie => movie.title === selectedMovie);
-    if (movie) {
-      const movieId = movie.id;
-      
-      // Check if an event already exists for the selected day
-      const existingEventIndex = userEvents.findIndex(event => {
-        if (typeof event.date === 'string') {
-          const eventDate = event.date.split('T')[0];
-          return eventDate === selectedDate.toISOString().split('T')[0];
-        }
-        return false;
-      });
+    if (eventDate && selectedMovie) {
+      const movie = movies.find((movie) => movie.title === selectedMovie);
+      if (movie) {
+        const movieId = movie.id;
 
-      if (existingEventIndex !== -1) {
-        // Update the existing event
-        handleEditEvent(userEvents[existingEventIndex], movieId);
+        // Check if an event already exists for the selected day
+        const existingEventIndex = userEvents.findIndex((event) => {
+          if (typeof event.date === "string") {
+            const eventDate = event.date.split("T")[0];
+            return eventDate === selectedDate.toISOString().split("T")[0];
+          }
+          return false;
+        });
+
+        if (existingEventIndex !== -1) {
+          // Update the existing event
+          handleEditEvent(userEvents[existingEventIndex], movieId);
+        } else {
+          // Add a new event
+          handleAddEvent(eventDate, movieId);
+        }
+        closeForm();
       } else {
-        // Add a new event
-        handleAddEvent(eventDate, movieId);
+        console.error("Selected movie not found in the list of movies");
       }
-      closeForm();
     } else {
-      console.error("Selected movie not found in the list of movies");
+      console.error("Event date or selected movie is not set");
     }
-  } else {
-    console.error("Event date or selected movie is not set");
-  }
-};
+  };
 
   const prevMonth = () => {
-    setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1));
+    setSelectedDate(
+      new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1)
+    );
   };
 
   const nextMonth = () => {
-    setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1));
+    setSelectedDate(
+      new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1)
+    );
   };
 
   const daysInMonth = (year, month) => {
@@ -180,119 +198,143 @@ function Calendar() {
   };
 
   const monthName = (month) => {
-    return new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date(selectedDate.getFullYear(), month, 1));
+    return new Intl.DateTimeFormat("en-US", { month: "long" }).format(
+      new Date(selectedDate.getFullYear(), month, 1)
+    );
   };
 
   const renderCalendar = () => {
-  const year = selectedDate.getFullYear();
-  const month = selectedDate.getMonth();
-  const totalDaysInMonth = daysInMonth(year, month);
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
+    const totalDaysInMonth = daysInMonth(year, month);
+    const firstDayOfMonth = new Date(year, month, 1).getDay();
 
-  const calendarRows = [];
+    const calendarRows = [];
 
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((dayName, index) => (
-    <th key={index} className="day">{dayName}</th>
-  ));
-  calendarRows.push(<tr key="dayNames">{dayNames}</tr>);
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
+      (dayName, index) => (
+        <th key={index} className="day">
+          {dayName}
+        </th>
+      )
+    );
+    calendarRows.push(<tr key="dayNames">{dayNames}</tr>);
 
-  let dayCount = 1;
-  for (let week = 0; week < 6; week++) {
-    const weekCells = [];
-    for (let i = 0; i < 7; i++) {
-      if ((week === 0 && i < firstDayOfMonth) || dayCount > totalDaysInMonth) {
-        weekCells.push(<td key={`${week}-${i}`} className="day"></td>);
-      } else {
-        const currentDay = dayCount; // Capture current dayCount value
-        const eventDay = new Date(year, month, currentDay).toISOString().split('T')[0];
-        const hasEvent = userEvents.some(event => {
-          if (typeof event.date === 'string') {
-            const eventDate = event.date.split('T')[0];
-            return eventDate === eventDay;
-          } else {
-            return false;
-          }
-        });
+    let dayCount = 1;
+    for (let week = 0; week < 6; week++) {
+      const weekCells = [];
+      for (let i = 0; i < 7; i++) {
+        if (
+          (week === 0 && i < firstDayOfMonth) ||
+          dayCount > totalDaysInMonth
+        ) {
+          weekCells.push(<td key={`${week}-${i}`} className="day"></td>);
+        } else {
+          const currentDay = dayCount; // Capture current dayCount value
+          const eventDay = new Date(year, month, currentDay)
+            .toISOString()
+            .split("T")[0];
+          const hasEvent = userEvents.some((event) => {
+            if (typeof event.date === "string") {
+              const eventDate = event.date.split("T")[0];
+              return eventDate === eventDay;
+            } else {
+              return false;
+            }
+          });
 
-        const event = userEvents.find(event => {
-          if (typeof event.date === 'string') {
-            const eventDate = event.date.split('T')[0];
-            return eventDate === eventDay;
-          } else {
-            return false;
-          }
-        });
+          const event = userEvents.find((event) => {
+            if (typeof event.date === "string") {
+              const eventDate = event.date.split("T")[0];
+              return eventDate === eventDay;
+            } else {
+              return false;
+            }
+          });
 
-        weekCells.push(
-    <td
-      key={`${year}-${month}-${currentDay}`}
-      className={`day ${hasEvent ? 'event-day' : ''}`}
-      onClick={() => selectDate(new Date(year, month, currentDay))}
-    >
-      <span className={hasEvent ? 'event-link' : ''}>
-        {currentDay}
-        {hasEvent && (
-          <div className="event-details">
-            {/* Render movie title */}
-            {(() => {
-              const event = userEvents.find(event => {
-                if (typeof event.date === 'string') {
-                  const eventDate = event.date.split('T')[0];
-                  return eventDate === eventDay;
-                } else {
-                  return false;
-                }
-              });
+          weekCells.push(
+            <td
+              key={`${year}-${month}-${currentDay}`}
+              className={`day ${hasEvent ? "event-day" : ""}`}
+              onClick={() => selectDate(new Date(year, month, currentDay))}
+            >
+              <span className={hasEvent ? "event-link" : ""}>
+                {currentDay}
+                {hasEvent && (
+                  <div className="event-details">
+                    {/* Render movie title */}
+                    {(() => {
+                      const event = userEvents.find((event) => {
+                        if (typeof event.date === "string") {
+                          const eventDate = event.date.split("T")[0];
+                          return eventDate === eventDay;
+                        } else {
+                          return false;
+                        }
+                      });
 
-              // Get movie title if movies list is available
-              const movie = movies.find(movie => movie.id === event.movieId);
-              const movieTitle = movie ? movie.title : 'Unknown';
-              return <span className="movie-name">{movieTitle}</span>;
-            })()}
-            <button onClick={(e) => { e.stopPropagation(); handleDeleteEvent(event.id); }}>
-              &times;
-            </button>
-          </div>
-        )}
-      </span>
-    </td>
-  );
-        dayCount++;
+                      // Get movie title if movies list is available
+                      const movie = movies.find(
+                        (movie) => movie.id === event.movieId
+                      );
+                      const movieTitle = movie ? movie.title : "Unknown";
+                      return <span className="movie-name">{movieTitle}</span>;
+                    })()}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteEvent(event.id);
+                      }}
+                    >
+                      &times;
+                    </button>
+                  </div>
+                )}
+              </span>
+            </td>
+          );
+          dayCount++;
+        }
       }
+      calendarRows.push(<tr key={`week-${week}`}>{weekCells}</tr>);
     }
-    calendarRows.push(<tr key={`week-${week}`}>{weekCells}</tr>);
-  }
 
-  return (
-    <table className="calendar-grid">
-      <tbody>
-        {calendarRows}
-      </tbody>
-    </table>
-  );
-};
+    return (
+      <table className="calendar-grid">
+        <tbody>{calendarRows}</tbody>
+      </table>
+    );
+  };
 
   return (
     <div className="container">
       <div className="header">
         <button onClick={prevMonth}>Previous Month</button>
-        <h2>{monthName(selectedDate.getMonth())} {selectedDate.getFullYear()}</h2>
+        <h2 className="calendar_Date">
+          {monthName(selectedDate.getMonth())} {selectedDate.getFullYear()}
+        </h2>
         <button onClick={nextMonth}>Next Month</button>
       </div>
       <div className="calendar-grid">{renderCalendar()}</div>
 
       {isFormOpen && (
-        <div className="modal">
-          <div className="modal-content">
+        <div className="modal_calendar">
+          <div className="modal-content_calendar">
             <h3>Select a Movie</h3>
-            <select value={selectedMovie || ''} onChange={handleMovieSelect}>
-              <option value="" disabled>Select a movie</option>
+            <select value={selectedMovie || ""} onChange={handleMovieSelect}>
+              <option value="" disabled>
+                Select a movie
+              </option>
               {movies.length > 0 ? (
-                movies.map(movie => (
-                  <option key={movie.id} value={movie.title}>{movie.title}</option>
+                movies.map((movie) => (
+                  <option key={movie.id} value={movie.title}>
+                    {movie.title}
+                  </option>
                 ))
               ) : (
-                <option value="" disabled>No movies available</option>
+                <option value="" disabled>
+                  No movies available
+                </option>
               )}
             </select>
             <button onClick={handleSaveEvent}>Save</button>
