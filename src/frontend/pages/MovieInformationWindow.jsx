@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom'
 import {
   deleteMovie,
   getMovie,
-  postComment, 
+  postComment,
+  getUser,
   getCommentsByMovieId,
   deleteComment,
   editComment 
@@ -24,7 +25,8 @@ function MovieInformation({ onShowEditModal }) {
   
   const [commentText, setCommentText] = useState("");
   const [showCommentForm, setShowCommentForm] = useState(false);
-  const [editingCommentId, setEditingCommentId] = useState(null); // State to store the ID of the comment being edited
+    const [editingCommentId, setEditingCommentId] = useState(null); // State to store the ID of the comment being edited
+    const [admin, setAdmin] = useState(null);
 
 
 
@@ -39,11 +41,25 @@ function MovieInformation({ onShowEditModal }) {
         setMovie(movieData);
       } catch (error) {
         console.error("Error fetching movie:", error);
-      }
-    };
+        }
+      };
 
     fetchMovieData();
   }, []);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const adminData = await getUser(currentUser);
+                console.log(adminData);
+                setAdmin(adminData);
+            } catch (error) {
+                console.error("Error fetching user:", error);
+            }
+        };
+
+        fetchUserData();
+    }, [currentUser]);
 
   useEffect(() => {
     if (movieId) {
@@ -147,13 +163,17 @@ function MovieInformation({ onShowEditModal }) {
           <div className="movie-information-card">
             <div className="title-year">
               <h2 className="movie-title">{movie.title}</h2>
-              <h2 className="movie-year">{movie.year}</h2>
-              <button className="edit-button" onClick={handleMovieEdit}>
-                <i className="fa-solid fa-pencil"></i>
-              </button>
-              <button className="delete-button" onClick={handleMovieDeletion}>
-                <i className="fa-solid fa-x"></i>
-              </button>
+                          <h2 className="movie-year">{movie.year}</h2>
+                          {admin === true ? (
+                              <>
+                                  <button className="edit-button" onClick={handleMovieEdit}>
+                                      <i className="fa-solid fa-pencil"></i>
+                                  </button>
+                                  <button className="delete-button" onClick={handleMovieDeletion}>
+                                      <i className="fa-solid fa-x"></i>
+                                  </button>
+                              </>
+                          ) : null}
             </div>
 
             <p className="movie-description">{movie.description}</p>
@@ -199,7 +219,7 @@ function MovieInformation({ onShowEditModal }) {
                   ) : (
                     <div>
                       <p><b>{comment.user}</b>
-                        {comment.user === currentUser && (
+                        {(comment.user === currentUser || admin) && (
                           <button className="comment-control" onClick={() => handleDeleteComment(comment.id)}>Delete</button>
                         )}
                         {comment.user === currentUser && (

@@ -3,7 +3,8 @@ import "../css/movieList.css";
 import {
   getMovieList,
   deleteMovie,
-  updateMovie,
+    updateMovie,
+    getUser,
 } from "../../backend/controllers/movieController";
 import { useAuth } from '../../authContext';
 
@@ -11,6 +12,7 @@ function MovieList({ ShowMovieAddForm }) {
   const [movies, setMovies] = useState([]);
     const [editedMovie, setEditedMovie] = useState(null);
     const { currentUser } = useAuth()
+    const [admin, setAdmin] = useState(null);
   useEffect(() => {
       const fetchMovies = async () => {
           const loadedMovies = await getMovieList(currentUser);
@@ -20,6 +22,20 @@ function MovieList({ ShowMovieAddForm }) {
     };
     fetchMovies();
   }, []);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const adminData = await getUser(currentUser);
+                console.log(adminData);
+                setAdmin(adminData);
+            } catch (error) {
+                console.error("Error fetching user:", error);
+            }
+        };
+
+        fetchUserData();
+    }, [currentUser]);
 
   const handleMovieAdd = () => {
     ShowMovieAddForm();
@@ -32,10 +48,14 @@ function MovieList({ ShowMovieAddForm }) {
 
   return (
     <>
-      <div className="movieListAddContainer">
-        <button className="navbar-button" onClick={handleMovieAdd}>
-          Add a Movie
-        </button>
+          <div className="movieListAddContainer">
+              {admin === true ? (
+                  <>
+                      <button className="navbar-button" onClick={handleMovieAdd}>
+                          Add a Movie
+                      </button>
+                  </>
+              ) : null}
         <button className="navbar-button">Filter</button>
       </div>
       <div className="main-container">
