@@ -124,6 +124,20 @@ export const getCommentsByMovieId = async (movieId) => {
     return [];
   }
 };
+export const getUser = async (user) => {
+    try {
+        const userSnapshot = await getDocs(collection(db, "users"));
+        const users = [];
+        userSnapshot.forEach((doc) => {
+            users.push({ id: doc.id, ...doc.data() });
+        });
+        const admin = users.filter(entry => entry.email === user);
+        return admin[0].isAdmin;
+    } catch (error) {
+        console.error("Error getting user:", error)
+        return null;
+    }
+};
 
 // Read a single movie
 export const getMovie = async (movieId) => {
