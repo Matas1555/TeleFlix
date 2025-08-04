@@ -1,30 +1,35 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import Cookies from "js-cookie";
-import { loginUser as loginUserFirebase } from "./backend/controllers/authController";
+import { auth } from "./backend/controllers/firebase-config";
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = Cookies.get("currentUser");
-    if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
-    }
-    setLoading(false); // Set loading to false after user is fetched
+    // Listen for Firebase auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user.email);
+        Cookies.set("currentUser", user.email, { expires: 7 });
+      } else {
+        setCurrentUser(null);
+        Cookies.remove("currentUser");
+      }
+      setLoading(false);
+    });
+
+    // Cleanup subscription
+    return () => unsubscribe();
   }, []);
-
-  useEffect(() => {
-    if (currentUser) {
-      Cookies.set("currentUser", JSON.stringify(currentUser), { expires: 7 });
-    }
-  }, [currentUser]);
 
   const login = async (email, password) => {
     try {
-      setCurrentUser(email); // Example to set more comprehensive user data
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      setCurrentUser(userCredential.user.email);
       return { status: true };
     } catch (error) {
       console.error("Error logging in:", error.message);
@@ -32,13 +37,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    setCurrentUser(null);
-    Cookies.remove("currentUser");
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      setCurrentUser(null);
+      Cookies.remove("currentUser");
+      return { status: true };
+    } catch (error) {
+      console.error("Error logging out:", error.message);
+      return { status: false, error: error.message };
+    }
   };
 
   if (loading) {
-    return <div>Loading...</div>; // Render loading state
+    return <div>Loading...</div>;
   }
 
   return (

@@ -31,7 +31,7 @@ th {
 
 .movie-list {
   width: 90%;
-  margin: 30px 100px 30px 100px;
+  margin: 100px 100px 100px 100px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;

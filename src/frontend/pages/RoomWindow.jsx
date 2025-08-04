@@ -33,8 +33,6 @@ import {
 } from "../../backend/controllers/roomController";
 import VideoJS from "../components/VideoJS";
 import { useAuth } from "../../authContext";
-import GameModal from "./../components/game.jsx";
-import GameAlert from "../components/gameAlert.jsx";
 
 function RoomPage() {
   //MODALS
@@ -42,7 +40,6 @@ function RoomPage() {
   const [showVoteModal, setShowVoteModal] = useState(false);
   const [isEventCreationVisable, setShowCreationForm] = useState(false);
   const [hasPredictionStarted, setShowPredictionForm] = useState(false);
-  const [showGame, setShowGame] = useState(false);
 
   //VARIABLES
   const [prediction, setPrediction] = useState("");
@@ -54,6 +51,7 @@ function RoomPage() {
   const [votedMovie, setVotedMovie] = useState("");
   const [movieList, setMovieList] = useState(null);
   const [buttonsDisabled, setButtonsDisabled] = useState(true);
+  const [chatMessage, setChatMessage] = useState("");
   const { currentUser } = useAuth();
   const playerRef = React.useRef(null);
   const videoJsOptions = React.useMemo(
@@ -85,7 +83,6 @@ function RoomPage() {
       if (result.status) {
         console.log("new user joined by link");
       }
-      //setUsers(roomData.users || []);
     };
 
     const setEventPrediction = async (roomID) => {
@@ -130,14 +127,7 @@ function RoomPage() {
           } else {
             setselectedMovieURL("");
           }
-          console.log(`Updated users in room ${id}:`, roomData.users); // Log when users array changes
-
-          // if (roomData.isMoviePlaying !== isMoviePlaying) {
-          //   setIsMoviePlaying(roomData.isMoviePlaying);
-          //   if (playerRef.current) {
-          //     console.log("player is playing");
-          //   }
-          // }
+          console.log(`Updated users in room ${id}:`, roomData.users);
 
           if (!isRoomCreator) {
             if (roomData.isMoviePlaying) {
@@ -145,14 +135,6 @@ function RoomPage() {
             } else {
               handlePause();
             }
-
-            // if (
-            //   playerRef.current &&
-            //   Math.abs(playerRef.current.currentTime() - roomData.currentTime) >
-            //     1
-            // ) {
-            //   playerRef.current.currentTime(roomData.currentTime);
-            // }
           }
 
           if (roomData.hasVotingStarted) {
@@ -174,7 +156,6 @@ function RoomPage() {
         }
       });
 
-      // Cleanup this component
       return () => unsubscribe();
     }
   }, []);
@@ -199,7 +180,6 @@ function RoomPage() {
       updateUserMovieHistory(currentUser, foundMovie.title);
       handleModalClose();
     }
-    //setselectedMovieURL(movieURL);
   };
 
   const handleFormInput = async (title) => {
@@ -305,9 +285,6 @@ function RoomPage() {
   };
   const handleModalClose = () => setShowModal(false);
 
-  const handleGameShow = () => setShowGame(true);
-  const handleGameClose = () => setShowGame(false);
-
   const handlePlayerReady = async (player) => {
     playerRef.current = player;
 
@@ -367,264 +344,240 @@ function RoomPage() {
     }
   };
 
+  const handleSendMessage = () => {
+    if (chatMessage.trim()) {
+      // TODO: Implement chat functionality
+      console.log("Sending message:", chatMessage);
+      setChatMessage("");
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
+    }
+  };
+
   return (
-    <>
-      <GameAlert />
-      {/* ------------------------------------------- MOVIE CHOOSING FORM --------------------------------- */}
-      <Modal show={showModal} onHide={handleModalClose}>
+    <div className="room-container">
+      {/* Movie Selection Modal */}
+      <Modal show={showModal} onHide={handleModalClose} className="modern-modal">
         <Modal.Header closeButton className="modal-header">
-          <Modal.Title>Choose a movie</Modal.Title>
+          <Modal.Title className="modal-title">Choose a Movie</Modal.Title>
         </Modal.Header>
-        <Modal.Body
-          className="modal-box"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <Form>
+        <Modal.Body className="modal-body">
+          <div className="movie-grid">
             {movieList &&
               movieList.map((movie, index) => (
-                <Row key={index} className="mb-3 justify-content-center">
-                  {" "}
-                  {/* mb-3 adds margin bottom for spacing */}
-                  <Col>
-                    <Button
-                      variant="outline-light"
-                      onClick={() =>
-                        handleMovieSelection(
-                          movie.movieURL,
-                          "Are you sure you want to select this movie?"
-                        )
-                      }
-                      style={{
-                        width: "100%",
-                        "max-width": "center",
-                      }}
-                    >
-                      {movie.title}
-                    </Button>{" "}
-                  </Col>
-                </Row>
+                <button
+                  key={index}
+                  className="movie-option"
+                  onClick={() =>
+                    handleMovieSelection(
+                      movie.movieURL,
+                      "Are you sure you want to select this movie?"
+                    )
+                  }
+                >
+                  <span className="movie-title">{movie.title}</span>
+                </button>
               ))}
-          </Form>
+          </div>
         </Modal.Body>
       </Modal>
-      {/* --------------------------------------------------------------------------------------------- */}
-      {/* ------------------------------------------- MOVIE VOTE FORM --------------------------------- */}
+
+      {/* Vote Modal */}
       <Modal
         backdrop="static"
         show={showVoteModal}
         onHide={handleVoteModalClose}
+        className="modern-modal"
       >
-        <Modal.Header closeButton className="modal-header custom-close-button">
-          <Modal.Title>Vote for a movie</Modal.Title>
+        <Modal.Header closeButton className="modal-header">
+          <Modal.Title className="modal-title">Vote for a Movie</Modal.Title>
         </Modal.Header>
-        <Modal.Body
-          className="modal-box"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <Form>
-            <Row>
-              <Timer onTimerEnd={handleTimerEnd}></Timer>
-            </Row>
+        <Modal.Body className="modal-body">
+          <div className="vote-timer">
+            <Timer onTimerEnd={handleTimerEnd} />
+          </div>
+          <div className="movie-grid">
             {movieList &&
               movieList.map((movie, index) => (
-                <Row
+                <button
                   key={index}
-                  className="mb-3 justify-content-center align-items-center"
+                  className={`movie-option ${buttonsDisabled ? 'disabled' : ''}`}
+                  onClick={() => handleFormInput(movie)}
+                  disabled={buttonsDisabled}
                 >
-                  {" "}
-                  <Col>
-                    <Button
-                      variant="outline-light"
-                      onClick={() => handleFormInput(movie)}
-                      disabled={buttonsDisabled}
-                      style={{
-                        width: "100%",
-                        "max-width": "center",
-                      }}
-                    >
-                      {movie.title}
-                    </Button>{" "}
-                  </Col>
-                </Row>
+                  <span className="movie-title">{movie.title}</span>
+                </button>
               ))}
-          </Form>
+          </div>
         </Modal.Body>
       </Modal>
-      {/* --------------------------------------------------------------------------------------------- */}
-      <GameModal
-        show={showGame}
-        handleClose={handleGameClose}
-        userEmail={currentUser}
-      />
-      <div className="roomContainer">
-        <div className="movieContainer">
-          {selectedMovieURL && isRoomCreator ? (
-            <>
-              <button onClick={handleMovieClose} className="movieCloseButton">
-                X
-              </button>
-            </>
-          ) : (
-            <></>
-          )}
-          {isRoomCreator ? (
-            <>
-              {selectedMovieURL && (
-                <VideoJS
-                  options={videoJsOptions}
-                  onReady={handlePlayerReady}
-                  room={roomID}
-                  isRoomCreator={isRoomCreator}
-                />
-              )}
-            </>
-          ) : (
-            <>
-              {selectedMovieURL && (
-                <VideoJS
-                  options={videoJsOptions}
-                  onReady={handlePlayerReady}
-                  room={roomID}
-                  isRoomCreator={isRoomCreator}
-                />
-              )}
-            </>
-          )}
-        </div>
-        <div className="sideBar">
-          <div className="room_text_code">
-            <p className="roomText">
-              Share this code so your friends can join!
-            </p>
-            <h1 className="roomCode">{roomID}</h1>
-          </div>
-          <div className="sidebarButtons">
-            <button className="room-button" onClick={handleGameShow}>
-              Start game
+
+      {/* Main Room Layout */}
+      <div className="room-layout">
+        {/* Video Player Section */}
+        <div className="video-section">
+          {selectedMovieURL && isRoomCreator && (
+            <button onClick={handleMovieClose} className="close-movie-btn">
+              <span>×</span>
             </button>
-            {isRoomCreator ? (
-              <button className="room-button" onClick={handleMovieEventStart}>
-                Predict what happens
-              </button>
-            ) : (
-              <></>
-            )}
-          </div>
-          {isRoomCreator ? (
-            <div className="sidebarButtons">
-              <button
-                className="room-button"
-                onClick={() => openMovieSelectionForm(false)}
-              >
-                Choose a movie
-              </button>
-              <button className="room-button" onClick={handleMovieVoteStart}>
-                Vote for a movie
-              </button>
+          )}
+          
+          {selectedMovieURL ? (
+            <div className="video-container">
+              <VideoJS
+                options={videoJsOptions}
+                onReady={handlePlayerReady}
+                room={roomID}
+                isRoomCreator={isRoomCreator}
+              />
             </div>
           ) : (
-            <></>
+            <div className="no-movie-placeholder">
+              <div className="placeholder-content">
+                <div className="placeholder-icon">🎬</div>
+                <h3>No Movie Selected</h3>
+                <p>Choose a movie to start watching together</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Sidebar Section */}
+        <div className="sidebar">
+          {/* Room Info */}
+          <div className="room-info">
+            <div className="room-code-section">
+              <h3 className="room-code-label">Room Code</h3>
+              <div className="room-code-display">
+                <span className="room-code">{roomID}</span>
+                <button className="copy-code-btn" onClick={() => navigator.clipboard.writeText(roomID)}>
+                  📋
+                </button>
+              </div>
+              <p className="room-code-hint">Share this code with friends to join!</p>
+            </div>
+          </div>
+
+          {/* Room Controls */}
+          {isRoomCreator && (
+            <div className="room-controls">
+              <div className="control-buttons">
+                <button className="control-btn primary" onClick={() => openMovieSelectionForm(false)}>
+                  <span className="btn-icon">🎬</span>
+                  Choose Movie
+                </button>
+                <button className="control-btn secondary" onClick={handleMovieVoteStart}>
+                  <span className="btn-icon">🗳️</span>
+                  Start Vote
+                </button>
+                <button className="control-btn tertiary" onClick={handleMovieEventStart}>
+                  <span className="btn-icon">🔮</span>
+                  Predict Event
+                </button>
+              </div>
+            </div>
           )}
 
-          <div className="message-window">
-            <div className="messages">
-              <p className="user_name">useername123</p>
-              <p className="user_message">this is a message</p>
+          {/* Chat Section */}
+          <div className="chat-section">
+            <div className="chat-header">
+              <h3>Live Chat</h3>
+              <span className="online-users">{users.length} online</span>
             </div>
-            <div className="chatInteraction">
+            
+            <div className="chat-messages">
+              <div className="message">
+                <span className="message-user">username123</span>
+                <span className="message-text">this is a message</span>
+              </div>
+              {/* More messages would be rendered here */}
+            </div>
+            
+            <div className="chat-input-section">
               <input
                 type="text"
-                placeholder="Write your message here..."
-                className="messageInput"
-              ></input>
-              <button className="room-button">Send</button>
+                placeholder="Type your message..."
+                className="chat-input"
+                value={chatMessage}
+                onChange={(e) => setChatMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+              />
+              <button className="send-btn" onClick={handleSendMessage}>
+                <span>➤</span>
+              </button>
             </div>
           </div>
-          {/* --------------------- EVENT CREATION WINDOW -------------------------------------*/}
-          {isEventCreationVisable && (
-            <div className="main_comment-window">
-              <button
-                onClick={handleCreationFormClose}
-                className="close-window-button"
-              >
-                <b>X</b>
-              </button>
-              <div className="user-comment-input">
-                <p className="eventText">
-                  What event do you think will happen in the movie?
-                </p>
-                <input
-                  id="eventPrediction"
-                  type="text"
-                  className="input-comment-field"
-                  name="eventPrediction"
-                />
-                <input
-                  type="submit"
-                  onClick={handleEventCreation}
-                  className="room-button"
-                  value="Submit"
-                />
-              </div>
-            </div>
-          )}
-          {/* --------------------- EVENT CREATION WINDOW -------------------------------------*/}
-          {/* --------------------- PREDICTION WINDOW -------------------------------------*/}
-          {hasPredictionStarted && (
-            <div className="main_comment-window">
-              <button
-                onClick={handlePredictionFormClose}
-                className="close-window-button"
-              >
-                <b>X</b>
-              </button>
-              <div className="user-comment-input">
-                {isRoomCreator ? (
-                  <>
-                    <p className="eventText">Did the event happen?</p>
-                    <input
-                      type="submit"
-                      onClick={() => handleVoteEnd(true)}
-                      className="room-button"
-                      value="Yes"
-                    />
-                    <input
-                      type="submit"
-                      onClick={() => handleVoteEnd(false)}
-                      className="room-button"
-                      value="No"
-                    />
-                  </>
-                ) : (
-                  <>
-                    <p className="roomText">{prediction}</p>
-                    <input
-                      type="submit"
-                      onClick={() => handleUserPrediction(true)}
-                      className="room-button"
-                      value="Yes"
-                    />
-                    <input
-                      type="submit"
-                      onClick={() => handleUserPrediction(false)}
-                      className="room-button"
-                      value="No"
-                    />
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-          {/* --------------------- PREDICTION WINDOW -------------------------------------*/}
         </div>
       </div>
-    </>
+
+      {/* Event Creation Overlay */}
+      {isEventCreationVisable && (
+        <div className="overlay">
+          <div className="overlay-content">
+            <button onClick={handleCreationFormClose} className="close-overlay-btn">
+              <span>×</span>
+            </button>
+            <div className="overlay-body">
+              <h3>Predict Movie Event</h3>
+              <p>What event do you think will happen in the movie?</p>
+              <input
+                id="eventPrediction"
+                type="text"
+                className="overlay-input"
+                placeholder="Enter your prediction..."
+              />
+              <button onClick={handleEventCreation} className="overlay-btn">
+                Submit Prediction
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Prediction Overlay */}
+      {hasPredictionStarted && (
+        <div className="overlay">
+          <div className="overlay-content">
+            <button onClick={handlePredictionFormClose} className="close-overlay-btn">
+              <span>×</span>
+            </button>
+            <div className="overlay-body">
+              {isRoomCreator ? (
+                <>
+                  <h3>Did the Event Happen?</h3>
+                  <p className="prediction-text">{prediction}</p>
+                  <div className="prediction-buttons">
+                    <button onClick={() => handleVoteEnd(true)} className="prediction-btn yes">
+                      ✅ Yes
+                    </button>
+                    <button onClick={() => handleVoteEnd(false)} className="prediction-btn no">
+                      ❌ No
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h3>Make Your Prediction</h3>
+                  <p className="prediction-text">{prediction}</p>
+                  <div className="prediction-buttons">
+                    <button onClick={() => handleUserPrediction(true)} className="prediction-btn yes">
+                      ✅ Yes
+                    </button>
+                    <button onClick={() => handleUserPrediction(false)} className="prediction-btn no">
+                      ❌ No
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

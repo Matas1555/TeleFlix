@@ -14,11 +14,21 @@ import "../css/navbar.css";
 import { auth } from "../../backend/controllers/firebase-config.js";
 
 const NavBar = () => {
-  const { currentUser, logoutUser } = useAuth();
+  const { currentUser, logout } = useAuth();
 
-  const handleLogout = () => {
-    // Call logout method from the authentication context
-    logoutUser();
+  const handleLogout = async () => {
+    try {
+      const result = await logout();
+      if (result.status) {
+        window.location.href = "/";
+      } else {
+        console.error("Logout failed:", result.error);
+        alert("Logout failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+      alert("An error occurred during logout.");
+    }
   };
 
   const openRoomCreationForm = () => {
@@ -51,22 +61,20 @@ const NavBar = () => {
             style={{ maxHeight: "100px" }}
             navbarScroll
           >
-            <Button className="navbar-button" onClick={openRoomCreationForm}>
-              Watch a movie!
-            </Button>
             <Nav.Link className="navbar-text" href="/movies">
               Movies
             </Nav.Link>
-            <Nav.Link className="navbar-text" href="/calendar">
-              Calendar
-            </Nav.Link>
+            <Button className="navbar-button" onClick={openRoomCreationForm}>
+              Watch a movie!
+            </Button>
           </Nav>
           <Nav>
             {currentUser ? (
               // If a user is logged in, display their username
               <>
-                <Nav.Link className="navbar-text" href="/shop">Shop</Nav.Link><Nav.Link className="navbar-text">{currentUser}</Nav.Link></>
-              
+                <Nav.Link className="navbar-text" onClick={handleLogout}>Logout</Nav.Link>
+                <Nav.Link className="navbar-text">{currentUser}</Nav.Link>
+              </>
             ) : (
               // If no user is logged in, display login and register links
               <>

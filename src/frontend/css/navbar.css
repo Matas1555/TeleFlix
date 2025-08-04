@@ -1,126 +1,308 @@
 .navbar {
-    background-color: #101316;
-    gap: 10px;
-    /* border-bottom: solid 2px black; */
-    border-bottom: 2px solid #283038;
-    position: relative;
+  background: rgba(16, 19, 22, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.navbar:hover {
+  background: rgba(16, 19, 22, 0.98);
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
 }
 
 .navbar-title {
-  font-family: Arial, Helvetica, sans-serif;
-  color: white;
-  font-size: 4rem;
-  font-weight: 900;
-  font-style: italic;
-  margin-right: 50px;
-}
-
-.navbar-text {
-  font-family: "Inter", sans-serif;
-  color: white;
-  font-size: 1.5rem;
-  margin-left: 50px;
-  margin-top: 10px;
-}
-
-.navbar-button {
-  align-items: center;
-  /* margin-right: 50px; */
-  background-color: #fff;
-  border: 2px solid #000;
-  box-sizing: border-box;
-  color: #000;
-  cursor: pointer;
-  display: inline-flex;
-  fill: #000;
-  font-family: Inter, sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  height: 48px;
-  justify-content: center;
-  letter-spacing: -0.8px;
-  line-height: 24px;
-  min-width: 140px;
-  outline: 0;
-  padding: 0 17px;
-  border-radius: 0%;
-  text-align: center;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 800;
+  font-style: normal;
+  margin: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #fa7272 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
   text-decoration: none;
-  transition: all 0.3s;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-  margin-top: 12px;
-}
-
-.navbar-button:focus {
-  color: #171e29;
-}
-
-.navbar-button:hover {
-  border-color: #fa7272;
-  color: #fa7272;
-  fill: #fa7272;
-  background-color: white;
-}
-
-.navbar-button:active {
-  border-color: #fa7272;
-  color: #fa7272;
-  fill: #fa7272;
-}
-
-@media (min-width: 768px) {
-  .navbar-button {
-    min-width: 170px;
-  }
-}
-
-.navbar-text:hover {
-  color: #fa7272;
+  margin-right: 25px;
 }
 
 .navbar-title:hover {
-  color: #fa7272;
+  background: linear-gradient(135deg, #fa7272 0%, #ff6b6b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transform: scale(1.05);
+  text-decoration: none;
 }
+
+/* Navigation Links */
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.navbar-text {
+  font-family: 'Inter', sans-serif;
+  color: #a0aec0;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 0.5rem 0;
+}
+
+.navbar-text::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(135deg, #fa7272 0%, #ff6b6b 100%);
+  transition: width 0.3s ease;
+}
+
+.navbar-text:hover {
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.navbar-text:hover::after {
+  width: 100%;
+}
+
+/* Modern Button */
+.navbar-button {
+  background: linear-gradient(135deg, #fa7272 0%, #ff6b6b 100%);
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(250, 114, 114, 0.3);
+}
+
+.navbar-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.navbar-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(250, 114, 114, 0.4);
+  text-decoration: none;
+  color: #ffffff;
+}
+
+.navbar-button:hover::before {
+  left: 100%;
+}
+
+.navbar-button:active {
+  transform: translateY(0);
+}
+
+.navbar-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(250, 114, 114, 0.3);
+}
+
+/* User Section */
+.navbar-nav .nav-link {
+  color: #a0aec0;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  margin: 0 0.25rem;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+  text-decoration: none;
+}
+
+/* Mobile Menu */
+.navbar-toggler {
+  border: none;
+  padding: 0.5rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.navbar-toggler:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.navbar-toggler:focus {
+  box-shadow: 0 0 0 3px rgba(250, 114, 114, 0.3);
+  outline: none;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Collapsed Menu */
+.navbar-collapse {
+  background: rgba(16, 19, 22, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 1rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Dropdown Styles */
 .dropdown-menu {
-    visibility: visible;
-    display: inline-block;
-    position: absolute;
-    top: calc(100% + 5px);
-    left: 0;
-    background-color: #fff;
-    border: 2px solid #000;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
-    padding: 10px;
-    z-index: 1000;
+  background: rgba(16, 19, 22, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  animation: dropdownFadeIn 0.3s ease;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dropdown-menu button {
-    display: block;
-    width: 100%;
-    padding: 10px 15px;
-    background-color: transparent;
-    border: none;
-    color: #000;
-    font-family: Inter, sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    text-align: left;
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
+  background: transparent;
+  border: none;
+  color: #a0aec0;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  width: 100%;
+  text-align: left;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .dropdown-menu button:hover {
-    background-color: #f5f5f5;
-    color: #fa7272;
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
 }
 
+.dropdown-menu button:focus {
+  outline: none;
+  background: rgba(250, 114, 114, 0.1);
+  color: #fa7272;
+}
 
-.dropdown-menu button:focus,
-.dropdown-menu button:active {
-    outline: none;
-    background-color: #f5f5f5;
-    color: #fa7272;
+/* Responsive Design */
+@media (max-width: 991.98px) {
+  .navbar {
+    padding: 1rem;
+  }
+  
+  .navbar-title {
+    font-size: 1.75rem;
+  }
+  
+  .navbar-nav {
+    gap: 1rem;
+  }
+  
+  .navbar-text {
+    font-size: 0.9rem;
+  }
+  
+  .navbar-button {
+    font-size: 0.85rem;
+    padding: 0.6rem 1.2rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .navbar-title {
+    font-size: 1.5rem;
+  }
+  
+  .navbar-nav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .navbar-text {
+    padding: 0.75rem 0;
+    width: 100%;
+  }
+  
+  .navbar-button {
+    width: 100%;
+    justify-content: center;
+    margin: 0.5rem 0;
+  }
+  
+  .navbar-collapse {
+    margin-top: 0.5rem;
+  }
+}
+
+/* Container adjustments */
+.navbar .container-fluid {
+  padding: 0;
+}
+
+/* Smooth transitions for all elements */
+.navbar * {
+  transition: all 0.3s ease;
+}
+
+/* Focus visible for accessibility */
+.navbar-text:focus-visible,
+.navbar-button:focus-visible {
+  outline: 2px solid #fa7272;
+  outline-offset: 2px;
+}
+
+/* Selection styles */
+.navbar ::selection {
+  background: rgba(250, 114, 114, 0.3);
+  color: #ffffff;
+}
+
+.navbar ::-moz-selection {
+  background: rgba(250, 114, 114, 0.3);
+  color: #ffffff;
 }

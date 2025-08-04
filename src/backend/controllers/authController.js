@@ -28,31 +28,29 @@ const comparePassword = async (password, hashedPassword) => {
 
 export const loginUser = async (email, password, login) => {
   try {
-    // Retrieve user document from Firestore based on email
+    // First, try to authenticate with Firebase
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    
+    // If Firebase auth succeeds, also verify against Firestore for additional data
     const usersRef = collection(db, "users");
     const querySnapshot = await getDocs(
       query(usersRef, where("email", "==", email))
     );
-    if (querySnapshot.empty) {
-      console.error("No user found with this email");
-      return { status: false, error: "Invalid email or password" };
+    
+    if (!querySnapshot.empty) {
+      const userDoc = querySnapshot.docs[0];
+      const userData = userDoc.data();
+      
+      // Verify password against Firestore hash (additional security layer)
+      const isPasswordMatch = await comparePassword(password, userData.password);
+      if (!isPasswordMatch) {
+        // If Firestore password doesn't match, sign out from Firebase
+        await auth.signOut();
+        console.error("Password verification failed");
+        return { status: false, error: "Invalid email or password" };
+      }
     }
 
-    // Get the first user document (assuming there's only one with this email)
-    const userDoc = querySnapshot.docs[0];
-    const userData = userDoc.data();
-
-    // Compare the provided password with the hashed password stored in the database
-    const isPasswordMatch = await comparePassword(password, userData.password);
-    if (!isPasswordMatch) {
-      console.error("Incorrect password");
-      return { status: false, error: "Invalid email or password" };
-    }
-
-    const loginResult = await login(email, password);
-
-    // Sign in the user with Firebase Authentication
-    //await signInWithEmailAndPassword(auth, email, password);
     console.log("User logged in successfully");
     return { status: true };
   } catch (error) {
@@ -63,42 +61,40 @@ export const loginUser = async (email, password, login) => {
 
 // Function to register a new user
 export const registerUser = async (email, username, password) => {
-  // Create user with email and password
-  console.log(email, username, password);
-  createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
-    })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.error("Error in user registration:", errorCode, errorMessage);
-    });
-    let nationality = -1;
-    try {
-        const userIP = await getUserIP();
-        nationality = await getUserISPNationality(userIP);
-    } catch (e) {
-        console.error("Error getting nationality: ", e)
-    }
-    if (nationality === -1) {
-        nationality = "";
-    }
+  let nationality = -1;
   try {
+    const userIP = await getUserIP();
+    nationality = await getUserISPNationality(userIP);
+  } catch (e) {
+    console.error("Error getting nationality: ", e)
+  }
+  if (nationality === -1) {
+    nationality = "";
+  }
+
+  try {
+    // Create user with Firebase Authentication
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    
+    // Hash password for Firestore storage
     const hashPass = await hashPassword(password);
+    
+    // Store additional user data in Firestore
     const docRef = await addDoc(collection(db, "users"), {
       email: email,
       username: username,
-      password: hashPass, //password
+      password: hashPass,
       points: 0,
       isAdmin: false,
       nationality: nationality,
+      firebaseUID: user.uid, // Link to Firebase user
     });
 
     console.log("Document written with ID: ", docRef.id);
-  } catch (e) {
-    console.error("Error adding document: ", e);
+    return { status: true };
+  } catch (error) {
+    console.error("Error in user registration:", error);
+    return { status: false, error: error.message };
   }
-
-  return { status: true };
 };
