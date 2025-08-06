@@ -30,6 +30,8 @@ import {
   getPrediction,
   addUserPrediction,
   checkUserAnswers,
+  sendMessage,
+  getMessages,
 } from "../../backend/controllers/roomController";
 import VideoJS from "../components/VideoJS";
 import { useAuth } from "../../authContext";
@@ -52,8 +54,11 @@ function RoomPage() {
   const [movieList, setMovieList] = useState(null);
   const [buttonsDisabled, setButtonsDisabled] = useState(true);
   const [chatMessage, setChatMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [movieSearchTerm, setMovieSearchTerm] = useState("");
   const { currentUser } = useAuth();
   const playerRef = React.useRef(null);
+  const chatMessagesRef = React.useRef(null);
   const videoJsOptions = React.useMemo(
     () => ({
       autoplay: false,
@@ -117,6 +122,7 @@ function RoomPage() {
           const roomData = doc.data();
 
           setUsers(roomData.users || []);
+          setMessages(roomData.messages || []);
 
           if (
             roomData.movieURL != null &&
@@ -168,6 +174,13 @@ function RoomPage() {
   useEffect(() => {
     getMovies();
   }, []);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (chatMessagesRef.current) {
+      chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const handleMovieSelection = (movieURL, caption) => {
     const confirmed = window.confirm(caption);
@@ -249,6 +262,7 @@ function RoomPage() {
 
   const handleMovieVoteStart = async () => {
     setButtonsDisabled(false);
+    setMovieSearchTerm(""); // Clear search when starting vote
     const result = await getMovies();
     setShowVoteModal(true);
     try {
@@ -266,6 +280,7 @@ function RoomPage() {
   const handleVoteModalClose = () => {
     setButtonsDisabled(false);
     setShowVoteModal(false);
+    setMovieSearchTerm(""); // Clear search when closing vote modal
     if (isRoomCreator) {
       updateRoomVoteStatus(roomID, false);
     }
@@ -273,6 +288,7 @@ function RoomPage() {
 
   const openMovieSelectionForm = async (forVoting) => {
     setButtonsDisabled(false);
+    setMovieSearchTerm(""); // Clear search when opening modal
     if (!forVoting) {
       try {
         const result = await getMovies();
@@ -283,7 +299,11 @@ function RoomPage() {
 
     setShowModal(true);
   };
-  const handleModalClose = () => setShowModal(false);
+  
+  const handleModalClose = () => {
+    setShowModal(false);
+    setMovieSearchTerm(""); // Clear search when closing modal
+  };
 
   const handlePlayerReady = async (player) => {
     playerRef.current = player;
@@ -344,11 +364,18 @@ function RoomPage() {
     }
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (chatMessage.trim()) {
-      // TODO: Implement chat functionality
-      console.log("Sending message:", chatMessage);
-      setChatMessage("");
+      try {
+        const result = await sendMessage(roomID, currentUser, chatMessage.trim());
+        if (result.status) {
+          setChatMessage("");
+        } else {
+          console.error("Failed to send message:", result.message);
+        }
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
     }
   };
 
@@ -358,30 +385,99 @@ function RoomPage() {
     }
   };
 
+  // Filter movies based on search term
+  const filteredMovies = movieList ? movieList.filter(movie => {
+    const searchLower = movieSearchTerm.toLowerCase();
+    
+    // Check title
+    if (movie.title && movie.title.toLowerCase().includes(searchLower)) {
+      return true;
+    }
+    
+    // Check director
+    if (movie.director && typeof movie.director === 'string' && 
+        movie.director.toLowerCase().includes(searchLower)) {
+      return true;
+    }
+    
+    // Check actors (handle both string and array cases)
+    if (movie.actors) {
+      if (typeof movie.actors === 'string') {
+        return movie.actors.toLowerCase().includes(searchLower);
+      } else if (Array.isArray(movie.actors)) {
+        return movie.actors.some(actor => 
+          typeof actor === 'string' && actor.toLowerCase().includes(searchLower)
+        );
+      }
+    }
+    
+    return false;
+  }) : [];
+
   return (
     <div className="room-container">
       {/* Movie Selection Modal */}
-      <Modal show={showModal} onHide={handleModalClose} className="modern-modal">
+      <Modal show={showModal} onHide={handleModalClose} className="modern-modal movie-selection-modal">
         <Modal.Header closeButton className="modal-header">
           <Modal.Title className="modal-title">Choose a Movie</Modal.Title>
         </Modal.Header>
         <Modal.Body className="modal-body">
-          <div className="movie-grid">
-            {movieList &&
-              movieList.map((movie, index) => (
-                <button
+          {/* Search Bar */}
+          <div className="movie-search-section">
+            <input
+              type="text"
+              className="movie-search-input"
+              placeholder="Search movies by title, director, or actors..."
+              value={movieSearchTerm}
+              onChange={(e) => setMovieSearchTerm(e.target.value)}
+            />
+            <div className="search-results-count">
+              {filteredMovies.length} movie{filteredMovies.length !== 1 ? 's' : ''} found
+            </div>
+          </div>
+          
+          {/* Movie Grid */}
+          <div className="movie-grid-enhanced">
+            {filteredMovies.length === 0 ? (
+              <div className="no-movies-found">
+                {movieSearchTerm ? 'No movies match your search.' : 'No movies available.'}
+              </div>
+            ) : (
+              filteredMovies.map((movie, index) => (
+                <div
                   key={index}
-                  className="movie-option"
+                  className="movie-room-card"
                   onClick={() =>
                     handleMovieSelection(
                       movie.movieURL,
-                      "Are you sure you want to select this movie?"
+                      `Are you sure you want to select "${movie.title}"?`
                     )
                   }
                 >
-                  <span className="movie-title">{movie.title}</span>
-                </button>
-              ))}
+                  <div className="movie-poster-container">
+                    {movie.posterURL ? (
+                      <img
+                        src={movie.posterURL}
+                        alt={movie.title}
+                        className="movie-poster"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div className="movie-poster-placeholder" style={{ display: movie.posterURL ? 'none' : 'flex' }}>
+                      🎬
+                    </div>
+                  </div>
+                  <div className="movie-room-info">
+                    <h4 className="movie-room-title">{movie.title}</h4>
+                    {movie.year && <span className="movie-room-year">({movie.year})</span>}
+                    {movie.director && <p className="movie-room-director">Dir: {movie.director}</p>}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </Modal.Body>
       </Modal>
@@ -400,18 +496,59 @@ function RoomPage() {
           <div className="vote-timer">
             <Timer onTimerEnd={handleTimerEnd} />
           </div>
-          <div className="movie-grid">
-            {movieList &&
-              movieList.map((movie, index) => (
-                <button
+          
+          {/* Movie Search for Voting */}
+          <div className="movie-search-section">
+            <input
+              type="text"
+              className="movie-search-input"
+              placeholder="Search movies to vote..."
+              value={movieSearchTerm}
+              onChange={(e) => setMovieSearchTerm(e.target.value)}
+            />
+          </div>
+          
+          <div className="movie-grid-enhanced vote-grid">
+            {filteredMovies.length === 0 ? (
+              <div className="no-movies-found">
+                {movieSearchTerm ? 'No movies match your search.' : 'No movies available.'}
+              </div>
+            ) : (
+              filteredMovies.map((movie, index) => (
+                <div
                   key={index}
-                  className={`movie-option ${buttonsDisabled ? 'disabled' : ''}`}
-                  onClick={() => handleFormInput(movie)}
-                  disabled={buttonsDisabled}
+                  className={`movie-room-card vote-card ${buttonsDisabled ? 'disabled' : ''}`}
+                  onClick={() => !buttonsDisabled && handleFormInput(movie)}
                 >
-                  <span className="movie-title">{movie.title}</span>
-                </button>
-              ))}
+                  <div className="movie-poster-container">
+                    {movie.posterURL ? (
+                      <img
+                        src={movie.posterURL}
+                        alt={movie.title}
+                        className="movie-poster"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div className="movie-poster-placeholder" style={{ display: movie.posterURL ? 'none' : 'flex' }}>
+                      🎬
+                    </div>
+                  </div>
+                  <div className="movie-room-info">
+                    <h4 className="movie-room-title">{movie.title}</h4>
+                    {movie.year && <span className="movie-room-year">({movie.year})</span>}
+                    {movie.director && <p className="movie-room-director">Dir: {movie.director}</p>}
+                  </div>
+                  {!buttonsDisabled && (
+                    <div className="vote-overlay">
+                      <span>Vote</span>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </Modal.Body>
       </Modal>
@@ -489,12 +626,27 @@ function RoomPage() {
               <span className="online-users">{users.length} online</span>
             </div>
             
-            <div className="chat-messages">
-              <div className="message">
-                <span className="message-user">username123</span>
-                <span className="message-text">this is a message</span>
-              </div>
-              {/* More messages would be rendered here */}
+            <div className="chat-messages" ref={chatMessagesRef}>
+              {messages.length === 0 ? (
+                <div className="no-messages">
+                  <p>No messages yet. Start the conversation!</p>
+                </div>
+              ) : (
+                messages.map((message) => (
+                  <div key={message.id} className="message">
+                    <div className="message-header">
+                      <span className="message-user">{message.user}</span>
+                      <span className="message-time">
+                        {new Date(message.timestamp).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </span>
+                    </div>
+                    <span className="message-text">{message.text}</span>
+                  </div>
+                ))
+              )}
             </div>
             
             <div className="chat-input-section">

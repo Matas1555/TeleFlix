@@ -62,29 +62,15 @@ function MovieList({ ShowMovieAddForm }) {
 
   return (
     <>
-      {/* <div className="movieListAddContainer">
-          {admin === true ? (
+      <div className="movieListAddContainer">
+          {currentUser !== null ? (
               <>
                   <button className="navbar-button" onClick={handleMovieAdd}>
                       Add a Movie
                   </button>
               </>
           ) : null}
-          <div class="navbar">
-          <button
-              className="navbar-button"
-              onClick={() => setShowDropdown(!showDropdown)}
-          >
-              Filter
-          </button>
-          {showDropdown && (
-              <div className="dropdown-menu">
-                      <button onClick={() => selectedFilter(1)}>Popular</button>
-                      <button onClick={() => selectedFilter(2)}>Least popular</button>
-              </div>
-              )}
-          </div>
-      </div> */}
+      </div>
       <div className="main-container">
         <div className="movie-list-container">
           <div className="movie-list">

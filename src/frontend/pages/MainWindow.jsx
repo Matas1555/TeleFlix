@@ -19,7 +19,7 @@ const HomePage = () => {
     
     try {
       const result = await addUserToRoom(roomID, currentUser);
-      if (result.status && currentUser != null) {
+      if (result.status) {
         window.open(`/room?roomID=${roomID}`, "_self");
         setMessage(result.message);
       } else {
@@ -41,7 +41,7 @@ const HomePage = () => {
   };
 
   const handleInputChange = (e) => {
-    const value = e.target.value.toUpperCase();
+    const value = e.target.value;
     setRoomID(value);
     setInputError("");
   };

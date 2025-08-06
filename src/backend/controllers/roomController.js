@@ -32,6 +32,7 @@ export const createRoom = async (userName) => {
       movieURL: "",
       users: [userName],
       roomCreator: userName,
+      messages: [],
     });
     console.log("Room added successfully with ID:", roomID);
     return { status: true, roomId: roomID };
@@ -420,6 +421,48 @@ export const closeMovie = async (roomID) => {
   await updateDoc(roomRef, {
     movieURL: "",
   });
+};
+
+export const sendMessage = async (roomID, userName, message) => {
+  const roomRef = doc(db, "rooms", roomID);
+  try {
+    const roomDoc = await getDoc(roomRef);
+    if (roomDoc.exists()) {
+      const messageObject = {
+        id: Date.now().toString(),
+        user: userName,
+        text: message,
+        timestamp: new Date().toISOString(),
+      };
+      
+      await updateDoc(roomRef, {
+        messages: arrayUnion(messageObject),
+      });
+      
+      return { status: true, message: "Message sent successfully" };
+    } else {
+      return { status: false, message: "Room does not exist" };
+    }
+  } catch (e) {
+    console.error("Error sending message: ", e);
+    return { status: false, message: e.message };
+  }
+};
+
+export const getMessages = async (roomID) => {
+  const roomRef = doc(db, "rooms", roomID);
+  try {
+    const roomDoc = await getDoc(roomRef);
+    if (roomDoc.exists()) {
+      const roomData = roomDoc.data();
+      return { status: true, messages: roomData.messages || [] };
+    } else {
+      return { status: false, message: "Room does not exist" };
+    }
+  } catch (e) {
+    console.error("Error getting messages: ", e);
+    return { status: false, message: e.message };
+  }
 };
 
 function generateID() {
